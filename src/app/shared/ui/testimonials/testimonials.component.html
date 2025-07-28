@@ -1,0 +1,120 @@
+<section class="testimonials-section py-16">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col xl:flex-row items-start">
+      <div class="w-full xl:w-2/5 mb-10 xl:mb-0 xl:pr-12">
+        <h2
+          class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+        >
+          What Our Clients Say
+        </h2>
+        <div class="w-20 h-1 bg-indigo-500 mb-6"></div>
+        <p class="text-gray-700 dark:text-gray-300 mb-6">
+          Don't just take our word for it. See what our clients have to say
+          about their experience working with us. We're proud to have helped
+          businesses across various industries achieve their goals and transform
+          their operations.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300">
+          Our team is dedicated to providing exceptional service and solutions
+          that drive real results. Join hundreds of satisfied customers who've
+          experienced the difference.
+        </p>
+      </div>
+
+      <div class="w-full xl:w-3/5">
+        <swiper-container
+          #swiperEl
+          init="false"
+          space-between="20"
+
+          loop="true"
+          [breakpoints]="{
+             '440': { slidesPerView: 1.1 },
+            '640': { slidesPerView: 2.1 },
+            '1024': { slidesPerView: 2.1 }
+          }"
+
+          class="py-8"
+        >
+          @for (testimonial of testimonials; track testimonial.id) {
+          <swiper-slide>
+            <div
+              class="card-content flex flex-col items-center p-6 bg-white dark:bg-zinc-950 rounded-2xl shadow-lg h-full"
+            >
+              <img
+                [src]="testimonial.avatar"
+                alt="{{ testimonial.name }}"
+                class="w-16 h-16 rounded-full mb-4 ring-2 ring-indigo-500"
+              />
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                {{ testimonial.name }}
+              </h3>
+              <p class="text-indigo-500 text-sm mb-2">{{ testimonial.role }}</p>
+              <p
+                class="text-gray-700 dark:text-gray-300 italic mb-4 text-center"
+              >
+                {{ testimonial.content }}
+              </p>
+              <div class="flex space-x-1 mt-auto">
+                <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                  <svg
+                    *ngIf="star <= testimonial.rating"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 text-yellow-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286
+                        3.974a1 1 0 00.95.69h4.178c.969 0
+                        1.371 1.24.588 1.81l-3.385 2.46a1
+                        1 0 00-.364 1.118l1.287 3.974c.3.921-.755
+                        1.688-1.54 1.118l-3.386-2.46a1
+                        1 0 00-1.175 0l-3.386
+                        2.46c-.784.57-1.838-.197-1.539-1.118l1.286-3.974a1
+                        1 0 00-.364-1.118L2.35
+                        9.401c-.783-.57-.38-1.81.588-1.81h4.178a1
+                        1 0 00.95-.69l1.286-3.974z"
+                    />
+                  </svg>
+                  
+                  <svg
+                    *ngIf="star > testimonial.rating"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11.049 2.927c.3-.921
+                        1.603-.921 1.902 0l1.286
+                        3.974a1 1 0 00.95.69h4.178c.969
+                        0 1.371 1.24.588
+                        1.81l-3.385 2.46a1 1 0
+                        00-.364 1.118l1.287 3.974c.3.921-.755
+                        1.688-1.54
+                        1.118l-3.386-2.46a1 1 0
+                        00-1.175 0l-3.386
+                        2.46c-.784.57-1.838-.197-1.539-1.118l1.286-3.974a1
+                        1 0 00-.364-1.118L2.35
+                        9.401c-.783-.57-.38-1.81.588-1.81h4.178a1
+                        1 0 00.95-.69l1.286-3.974z"
+                    />
+                  </svg>
+                </ng-container>
+              </div>
+            </div>
+          </swiper-slide>
+          }
+        </swiper-container>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+

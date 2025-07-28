@@ -1,0 +1,177 @@
+/* src/app/components/testimonials/testimonials.component.css */
+
+/*
+  IMPORTANT: Swiper's core, navigation, pagination, effect CSS
+  are usually INCLUDED when you use `swiper/element/bundle` and call `register()`.
+  If you were using `swiper/element` (core only) and registering modules manually,
+  you'd need to import their CSS like:
+  @import 'swiper/css';
+  @import 'swiper/css/navigation';
+  @import 'swiper/css/pagination';
+  @import 'swiper/css/scrollbar';
+  @import 'swiper/css/effect-fade';
+  @import 'swiper/css/lazy';
+  etc.
+  But with the bundle, this is often handled.
+*/
+
+/* Container styling for the swiper */
+.my-swiper-container {
+  width: 100%;
+  max-width: 1200px; /* Adjust as needed */
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 20px; /* Space for potential top elements or just visual */
+  padding-bottom: 50px; /* Space for pagination/scrollbar */
+  overflow: hidden; /* Recommended by Swiper to prevent layout issues */
+}
+
+/* Individual slide styling */
+.testimonial-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  /* Height is important, especially if not all slides have same content height */
+  height: auto; /* Or set a fixed height like 450px if designs are consistent */
+}
+
+.testimonial-card {
+  width: 100%;
+  max-width: 380px; /* Max width for a card */
+  min-height: 380px; /* Ensure cards have a minimum height */
+  box-sizing: border-box;
+}
+
+/* --- Custom Navigation Buttons --- */
+.swiper-navigation-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: background-color 0.3s, color 0.3s;
+}
+.swiper-navigation-button:hover {
+  background-color: rgb(79 70 229); /* indigo-600 */
+  color: white;
+}
+.swiper-navigation-button.swiper-button-disabled {
+  opacity: 0.35;
+  cursor: auto;
+  pointer-events: none;
+}
+.dark .swiper-navigation-button {
+  background-color: rgba(55, 65, 81, 0.8); /* gray-700 with opacity */
+  color: #f3f4f6; /* gray-100 */
+}
+.dark .swiper-navigation-button:hover {
+  background-color: rgb(99 102 241); /* indigo-500 */
+  color: white;
+}
+
+/* --- Custom Pagination --- */
+.swiper-pagination-custom {
+  position: relative; /* Or absolute if you want to overlay it */
+  text-align: center;
+  bottom: 10px; /* Adjust as needed if absolute */
+  width: 100%;
+  padding-top: 10px; /* Add some space if it's below the swiper */
+}
+.swiper-pagination-custom .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background-color: #ccc;
+  opacity: 0.7;
+  border-radius: 50%;
+  margin: 0 5px;
+  transition: background-color 0.3s, opacity 0.3s, transform 0.3s;
+  display: inline-block; /* Ensure bullets are on the same line */
+}
+.swiper-pagination-custom .swiper-pagination-bullet-active {
+  background-color: rgb(79 70 229); /* indigo-600 */
+  opacity: 1;
+  transform: scale(1.2);
+}
+.dark .swiper-pagination-custom .swiper-pagination-bullet {
+  background-color: #6b7280; /* gray-500 */
+}
+.dark .swiper-pagination-custom .swiper-pagination-bullet-active {
+  background-color: rgb(99 102 241); /* indigo-500 */
+}
+
+/* --- Custom Scrollbar --- */
+.swiper-scrollbar-custom {
+  position: relative; /* Or absolute */
+  bottom: 5px; /* Adjust if absolute */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%; /* Or set specific width */
+  height: 4px !important; /* Swiper applies its own styles, override if needed */
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin-top: 20px;
+}
+.swiper-scrollbar-custom .swiper-scrollbar-drag {
+  background: rgb(79 70 229); /* indigo-600 */
+  border-radius: 10px;
+}
+.dark .swiper-scrollbar-custom {
+  background: rgba(255, 255, 255, 0.1);
+}
+.dark .swiper-scrollbar-custom .swiper-scrollbar-drag {
+  background: rgb(99 102 241); /* indigo-500 */
+}
+
+/* --- Styles for Lazy Loading --- */
+.slide-with-background {
+  width: 100%;
+  height: 400px; /* Example height */
+  position: relative;
+  overflow: hidden;
+}
+.slide-with-background img.swiper-lazy {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.swiper-lazy-preloader {
+  width: 42px;
+  height: 42px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -21px;
+  margin-top: -21px;
+  z-index: 10;
+  transform-origin: 50%;
+  box-sizing: border-box;
+  border: 4px solid #868383; /* var(--swiper-preloader-color) equivalent */
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: swiper-preloader-spin 1s infinite linear;
+}
+.swiper-lazy-preloader-white {
+  border-color: #fff;
+  border-top-color: transparent;
+}
+@keyframes swiper-preloader-spin {
+  to { transform: rotate(360deg); }
+}
+
+.slide-content {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}

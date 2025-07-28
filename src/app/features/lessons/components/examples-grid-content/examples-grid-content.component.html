@@ -1,0 +1,12 @@
+@if (gridContent(); as content) {
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    @for (item of content.exampleItems; track item.id) {
+      <div class="group relative aspect-square overflow-hidden rounded-xl border-2 border-gray-200 dark:border-slate-700">
+        <img [src]="item.imageUrl | toAbsoluteUrl" [alt]="'Example image'" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110">
+        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <audio controls [src]="item.audioUrl | toAbsoluteUrl" class="w-full px-2"></audio>
+        </div>
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,58 @@
+@if (curriculumService.selectedCurriculum(); as curriculum) {
+  <div class="flex-1 bg-gray-50 dark:bg-slate-800/50 p-6 lg:p-8">
+
+    <header class="pb-6 border-b border-gray-200 dark:border-slate-700 mb-8">
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50">{{ curriculum.title }}</h1>
+      <p class="mt-1 text-slate-500 dark:text-slate-400">{{ curriculum.introduction }}</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <aside class="lg:col-span-1">
+        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">فصول المنهج</h2>
+        <nav class="space-y-2">
+          @for (chapter of curriculum.chapters; track chapter.id) {
+            <button
+              (click)="selectChapter(chapter.id)"
+              [ngClass]="{
+                'bg-blue-600 text-white': selectedChapterId() === chapter.id,
+                'bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700': selectedChapterId() !== chapter.id
+              }"
+              class="w-full text-right p-4 rounded-lg font-bold text-lg transition-colors duration-200 shadow-sm"
+            >
+              {{ chapter.title }}
+            </button>
+          }
+        </nav>
+      </aside>
+
+      <main class="lg:col-span-2">
+        @if (selectedChapter(); as chapter) {
+          <div>
+            <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">دروس الفصل</h2>
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
+              @for (lesson of chapter.lessons; track lesson.id) {
+                <a [routerLink]="['/lessons', lesson.id]" class="flex items-center justify-between p-4 text-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700/50 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
+                  <span>{{ lesson.title }}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                </a>
+              } @empty {
+                <p class="p-4 text-slate-500">لا توجد دروس في هذا الفصل بعد.</p>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="flex items-center justify-center h-full p-8 bg-white dark:bg-slate-800 rounded-lg">
+            <p class="text-slate-500">الرجاء تحديد فصل لعرض دروسه.</p>
+          </div>
+        }
+      </main>
+
+    </div>
+  </div>
+} @else {
+  <div class="flex-1 p-6 lg:p-8 animate-pulse">
+    <div class="h-9 w-3/4 bg-gray-200 dark:bg-slate-700 rounded-md mb-4"></div>
+    <div class="h-6 w-1/2 bg-gray-200 dark:bg-slate-700 rounded-md"></div>
+  </div>
+}

@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: #F8F9FA;     /* Very light gray background */
+  --color-surface: #FFFFFF;        /* Pure white for cards */
+  --color-primary: #2563EB;        /* Primary blue for main elements */
+  --color-primary-light: #93C5FD;  /* Lighter blue for hover effects or secondary text */
+  --color-text: #1F2937;           /* Dark gray for readable text */
+  --color-muted: #6B7280;          /* Muted gray for descriptions */
+  --color-border: #E5E7EB;         /* Light gray for borders */
+
+  --color-accent-yellow: #FBBF24;
+  --color-accent-green: #34D399;
+  --color-accent-red: #F87171;
+}
+
+.dark {
+  --color-background: #111827;     /* Dark gray background */
+  --color-surface: #1F2937;        /* Lighter dark shade for cards */
+  --color-primary: #60A5FA;        /* Brighter blue for contrast in dark mode */
+  --color-primary-light: #93C5FD;
+  --color-text: #F9FAFB;           /* Off-white for readable text */
+  --color-muted: #9CA3AF;          /* Lighter muted gray */
+  --color-border: #374151;         /* Darker gray for borders */
+
+  --color-accent-yellow: #FBBF24;
+  --color-accent-green: #34D399;
+  --color-accent-red: #F87171;
+}
+
+@import 'swiper/css/thumbs';

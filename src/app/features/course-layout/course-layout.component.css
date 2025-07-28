@@ -1,0 +1,15 @@
+// Add these styles for the new course sidebar
+.lesson-link {
+  &.active-lesson {
+    @apply bg-blue-600 text-white shadow-lg;
+
+    // Make the icon stand out in the active state
+    .dark & div, .light & div {
+      @apply bg-white text-blue-600;
+    }
+  }
+
+  &:not(.active-lesson):hover {
+    @apply bg-gray-100 dark:bg-slate-700/60;
+  }
+}

@@ -1,0 +1,11 @@
+.lesson-link {
+  @apply text-slate-600 dark:text-slate-300;
+
+  &:hover {
+    @apply bg-gray-100 dark:bg-slate-700;
+  }
+
+  &.active-lesson {
+    @apply bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 font-semibold;
+  }
+}

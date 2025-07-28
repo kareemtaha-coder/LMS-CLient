@@ -1,0 +1,44 @@
+/* Default and Hover States */
+.lesson-link {
+  color: #475569; /* text-slate-600 */
+}
+.dark .lesson-link {
+  color: #cbd5e1; /* dark:text-slate-300 */
+}
+.lesson-link:hover {
+  background-color: #f1f5f9; /* hover:bg-gray-100 */
+}
+.dark .lesson-link:hover {
+  background-color: #334155; /* dark:hover:bg-slate-700 */
+}
+
+/* Icon Default State */
+.icon-container {
+  background-color: #e2e8f0; /* bg-slate-200 */
+  color: #64748b; /* text-slate-500 */
+}
+.dark .icon-container {
+  background-color: #475569; /* dark:bg-slate-600 */
+  color: #94a3b8; /* dark:text-slate-400 */
+}
+
+/* Beautiful Active State */
+.lesson-link.active-lesson {
+  background-color: #eff6ff; /* bg-blue-50 */
+  color: #2563eb; /* text-blue-700 */
+  font-weight: 600; /* font-semibold */
+  box-shadow: 0 4px 14px 0 rgb(37 99 235 / 10%); /* Custom shadow */
+}
+.dark .lesson-link.active-lesson {
+  background-color: #1e293b; /* dark:bg-slate-800, but darker than default */
+  color: #60a5fa; /* dark:text-blue-400 */
+}
+
+.lesson-link.active-lesson .icon-container {
+  background-color: #2563eb; /* bg-blue-600 */
+  color: #ffffff; /* text-white */
+}
+.dark .lesson-link.active-lesson .icon-container {
+  background-color: #60a5fa; /* dark:bg-blue-400 */
+  color: #1e293b; /* dark:text-slate-800 */
+}

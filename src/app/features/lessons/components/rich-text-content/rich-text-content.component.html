@@ -1,0 +1,8 @@
+@if (richTextContent(); as content) {
+  <div [class]="noteClasses()">
+    <div class="prose dark:prose-invert max-w-none">
+      <p>{{ content.arabicText }}</p>
+      <p class="text-slate-500 dark:text-slate-400" lang="en">{{ content.englishText }}</p>
+    </div>
+  </div>
+}

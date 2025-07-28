@@ -1,0 +1,16 @@
+@if (content(); as c) {
+  @switch (c.contentType) {
+    @case ('RichText') {
+      <app-rich-text-content [content]="c" />
+    }
+    @case ('Video') {
+      <app-video-content [content]="c" />
+    }
+    @case ('ImageWithCaption') {
+      <app-image-with-caption-content [content]="c" />
+    }
+    @case ('ExamplesGrid') {
+      <app-examples-grid-content [content]="c" />
+    }
+  }
+}

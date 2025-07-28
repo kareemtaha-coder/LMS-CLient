@@ -1,0 +1,12 @@
+
+  .swiper {
+    width: 100%;
+    height: 100%;
+  }
+  .thumb-swiper .swiper-slide {
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+  .thumb-swiper .swiper-slide-thumb-active {
+    opacity: 1;
+  }
