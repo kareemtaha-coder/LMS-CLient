@@ -1,12 +1,14 @@
 @if (videoContent(); as content) {
-  <div class="w-full h-full flex items-center justify-center bg-black/50 p-4">
+  <div class="w-full h-full flex items-center justify-center ">
+
     <iframe
-      class="w-full aspect-video max-w-full max-h-full rounded-xl shadow-2xl bg-black"
-      [src]="content.videoUrl | safeUrl"
+      class="w-[90vw] aspect-video max-h-[70vh] md:max-h-[90vh] rounded-lg md:rounded-xl shadow-2xl bg-black"
+      [src]="(content.videoUrl + '?autoplay=1&rel=0&modestbranding=1&showinfo=0') | safeUrl"
       title="Lesson Video"
       frameborder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowfullscreen>
     </iframe>
+
   </div>
 }

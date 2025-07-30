@@ -1,0 +1,6 @@
+.content-grid-background {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 3rem 3rem; /* Controls the size of the grid squares */
+}

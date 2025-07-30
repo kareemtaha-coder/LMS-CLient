@@ -1,19 +1,16 @@
-.note {
-  @apply flex gap-4 p-5 rounded-xl border-l-8;
+
+/*
+  This class applies the Amiri font, for a Quran-like feel.
+  Make sure you have already imported 'Amiri' in your global styles.css.
+*/
+.font-arabic-elegant {
+  font-family: 'Amiri', serif;
 }
 
-.note-normal {
-  @apply bg-slate-50 border-slate-400 dark:bg-slate-800 dark:border-slate-600;
-}
-
-.note-important {
-  @apply bg-blue-50 border-blue-500 dark:bg-blue-950 dark:border-blue-700;
-}
-
-.note-warning {
-  @apply bg-amber-50 border-amber-500 dark:bg-amber-950 dark:border-amber-700;
-}
-
-.note-tip {
-  @apply bg-teal-50 border-teal-500 dark:bg-teal-950 dark:border-teal-700;
+/*
+  This class applies the Poppins font for a clean, modern learning experience.
+  Make sure you have already imported 'Poppins' in your global styles.css.
+*/
+.font-english-learning {
+  font-family: 'Poppins', sans-serif;
 }

@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
-import { LessonSummary } from '../../../Core/api/api-models';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { LessonContent, LessonSummary } from '../../../Core/api/api-models';
+import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { LessonService } from '../../lessons/lesson.service';
 
 @Component({
   selector: 'app-lesson-accordion-item',
-  imports: [RouterLink, RouterLinkActive, NgClass],
+  standalone: true,
+  imports: [NgClass],
   templateUrl: './lesson-accordion-item.component.html',
   styleUrl: './lesson-accordion-item.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,31 +23,21 @@ export class LessonAccordionItemComponent {
   protected lessonService = inject(LessonService);
   private router = inject(Router);
 
-  // --- State ---
-  isOpen = signal(false);
-
   // --- Computed Signals ---
-  // Check if this lesson is the currently active one in the main view
+  // --- التعديل النهائي والحاسم ---
+  // أصبح الآن يعتمد على Signal حقيقي من الخدمة، مما يجعله تفاعليًا
   isActive = computed(() => {
-    return this.router.url.includes(`/lessons/${this.lesson().id}`);
+    // هل معرف الدرس النشط في الخدمة يطابق معرف هذا المكون؟
+    return this.lessonService.activeLessonId() === this.lesson().id;
   });
 
-  constructor() {
-    // Effect to auto-open this accordion if it becomes the active lesson
-    effect(() => {
-      if (this.isActive()) {
-        this.isOpen.set(true);
-      }
-    });
+  navigateToLesson(): void {
+    // لا داعي للتحقق من `isActive` هنا، الراوتر ذكي بما فيه الكفاية
+    // لعدم إعادة التحميل إذا كان الرابط هو نفسه بالفعل.
+    this.router.navigate(['/course', this.courseId(), 'lessons', this.lesson().id]);
   }
 
-  // --- Methods ---
-  toggle(): void {
-    // If it's already active, toggling just opens/closes the content list.
-    // If it's not active, toggling will also navigate to it.
-    if (!this.isActive()) {
-      this.router.navigate(['/course', this.courseId(), 'lessons', this.lesson().id]);
-    }
-    this.isOpen.update(open => !open);
+  onContentSelect(content: LessonContent): void {
+    this.lessonService.selectContent(content);
   }
 }

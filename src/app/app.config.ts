@@ -15,6 +15,7 @@ export const appConfig: ApplicationConfig = {
     // 4. توفير خدمة HttpClient لحل الخطأ السابق
     provideHttpClient(),
     // 3. توفير عنوان URL الأساسي باستخدام التوكن
-    { provide: BASE_URL, useValue: 'https://localhost:7255' }
+    { provide: BASE_URL, useValue: 'https://localhost:7255' },
+
   ]
 };

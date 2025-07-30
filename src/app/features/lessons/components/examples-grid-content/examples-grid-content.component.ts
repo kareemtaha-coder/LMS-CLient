@@ -1,21 +1,41 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { ExamplesGridContent, LessonContent } from '../../../../Core/api/api-models';
 import { ToAbsoluteUrlPipe } from "../../../../Core/pipes/to-absolute-url.pipe";
+import { NgIf, NgFor, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-examples-grid-content',
   standalone: true,
-  imports: [ToAbsoluteUrlPipe],
-  templateUrl: './examples-grid-content.component.html',
+  imports: [ToAbsoluteUrlPipe, NgIf, NgFor, NgClass],
+  templateUrl: './examples-grid-content.component.html', // We will use a separate file for the template
+  styleUrls: ['./examples-grid-content.component.css'],   // And a separate file for styles
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExamplesGridContentComponent {
-  // 1. Input now accepts the general LessonContent union type.
   content = input.required<LessonContent>();
 
-  // 2. We create a computed signal to safely cast the input to the specific type.
   gridContent = computed(() => {
     const c = this.content();
     return c.contentType === 'ExamplesGrid' ? (c as ExamplesGridContent) : null;
   });
+
+  playingAudio = signal<HTMLAudioElement | null>(null);
+
+  toggleAudio(audioPlayer: HTMLAudioElement): void {
+    const currentlyPlaying = this.playingAudio();
+    if (currentlyPlaying && currentlyPlaying !== audioPlayer) {
+      currentlyPlaying.pause();
+    }
+    if (audioPlayer.paused) {
+      audioPlayer.play();
+      this.playingAudio.set(audioPlayer);
+    } else {
+      audioPlayer.pause();
+      this.playingAudio.set(null);
+    }
+  }
+
+  onAudioEnded(): void {
+    this.playingAudio.set(null);
+  }
 }

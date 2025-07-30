@@ -1,14 +1,19 @@
 @if (imageContent(); as content) {
-  <figure class="flex flex-col items-center">
-    <img
-      [src]="content.imageUrl | toAbsoluteUrl"
-      [alt]="content.caption"
-      class="max-w-full h-auto rounded-xl shadow-md"
-    >
-    @if(content.caption) {
-      <figcaption class="mt-4 text-center text-slate-500 dark:text-slate-400 italic">
-        {{ content.caption }}
-      </figcaption>
-    }
-  </figure>
+  <div class="w-full min-h-[85vh] flex items-center justify-center p-4">
+
+    <figure class="flex flex-col items-center gap-6 text-center">
+      <img
+        [src]="content.imageUrl | toAbsoluteUrl"
+        [alt]="content.caption"
+        class="h-[30vh] w-auto rounded-xl object-contain"
+      >
+
+      @if(content.caption) {
+        <figcaption class="max-w-3xl text-xl text-slate-600 dark:text-slate-400">
+          {{ content.caption }}
+        </figcaption>
+      }
+    </figure>
+
+  </div>
 }

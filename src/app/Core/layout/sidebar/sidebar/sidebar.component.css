@@ -157,3 +157,16 @@
 .nav-section::-webkit-scrollbar-thumb:hover {
   @apply bg-muted;
 }
+/* هذا هو تعريف كلاس الرابط النشط.
+  عندما يكون الرابط نشطًا، سيحصل على هذه الأنماط الاحترافية.
+*/
+.active-link {
+  @apply bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400;
+  /* خط على اليمين لتمييز الرابط النشط */
+  @apply border-r-4 border-indigo-500;
+}
+
+/* لجعل لون الأيقونة يتغير مع النص في الرابط النشط */
+.active-link svg {
+  @apply text-indigo-600 dark:text-indigo-400;
+}

@@ -3,10 +3,9 @@
   <app-navbar (toggleSidebar)="toggleSidebar()" />
 
   <div class="flex flex-1 overflow-hidden">
-
- @if (layoutService.isMainSidebarVisible()) {
-    <app-sidebar [isCollapsed]="sidebarCollapsed()" />
-  }
+@if (!layoutService.isAppSidebarCollapsed()) {
+  <app-sidebar></app-sidebar>
+}
     <main class="flex-1 overflow-y-auto">
       <router-outlet />
     </main>

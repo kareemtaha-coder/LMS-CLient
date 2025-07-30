@@ -4,9 +4,9 @@ import { LessonLayoutComponent } from './features/lessons/lesson-layout/lesson-l
 import { inject } from '@angular/core';
 import { LessonContent, LessonDetails } from './Core/api/api-models';
 import { LessonService } from './features/lessons/lesson.service';
-import { ContentHostComponent } from './features/lessons/content-host/content-host.component'; // <-- Import the new host component
+import { ContentHostComponent } from './features/lessons/content-host/content-host.component';
 
-// Resolver for the entire lesson object. (No changes here)
+// Resolver for the entire lesson object.
 const lessonResolver: ResolveFn<LessonDetails | null> = (route: ActivatedRouteSnapshot) => {
   const lessonService = inject(LessonService);
   const lessonId = route.paramMap.get('lessonId');
@@ -16,12 +16,8 @@ const lessonResolver: ResolveFn<LessonDetails | null> = (route: ActivatedRouteSn
   return null;
 };
 
-// Resolver for a single piece of content. (No changes here)
-const contentResolver: ResolveFn<LessonContent | undefined> = (route: ActivatedRouteSnapshot) => {
-  const lesson = route.parent?.data['lesson'] as LessonDetails;
-  const contentId = route.paramMap.get('contentId');
-  return lesson?.contents.find(c => c.id === contentId);
-};
+// The content resolver is no longer needed by the router directly.
+// const contentResolver: ResolveFn<LessonContent | undefined> = ...
 
 export const routes: Routes = [
   { path: '', redirectTo: 'curriculums', pathMatch: 'full' },
@@ -36,27 +32,8 @@ export const routes: Routes = [
         resolve: {
           lesson: lessonResolver
         },
-        children: [
-          {
-            path: '',
-            pathMatch: 'full',
-            redirectTo: (route) => {
-              const lesson = route.data['lesson'] as LessonDetails;
-              const firstContentId = lesson?.contents?.[0]?.id;
-              return firstContentId ? `content/${firstContentId}` : '';
-            }
-          },
-          {
-            path: 'content/:contentId',
-            // THE FIX: Statically load the ContentHostComponent.
-            component: ContentHostComponent,
-            resolve: {
-              // The resolver provides the data that ContentHostComponent needs.
-              content: contentResolver
-            },
-            // The complex loadComponent function is no longer needed here.
-          }
-        ]
+        // The children array has been REMOVED from here to prevent the URL from changing.
+        // Content will now be managed by the LessonLayoutComponent itself.
       }
     ]
   },
