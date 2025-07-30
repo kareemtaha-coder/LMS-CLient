@@ -243,12 +243,32 @@ export interface AddVideoRequest {
 /**
  * Represents the request body for adding an empty examples grid.
  * [cite_start]As per `POST /api/lessons/{lessonId}/contents/examples-grid`. [cite: 3844-3848]
- */
+//  */
+// export interface AddExamplesGridRequest {
+//   title: string; // The form will send a simple string
+//   sortOrder: number;
+// }
+
+// 2. Define the main request interface, ensuring it includes the 'examples' array
 export interface AddExamplesGridRequest {
-  title: string; // The form will send a simple string
+  title: string;
   sortOrder: number;
 }
+export interface ExampleItem {
+  id: string;
+  imageUrl: string;
+  audioUrl: string;
+}
+export interface ExamplesGridContent extends LessonContentBase {
+  contentType: 'ExamplesGrid';
+  examples: ExampleItem[];
+}
 
+
+export interface AddExampleItemRequest {
+  imageFile: File;
+  audioFile: File;
+}
 
 export interface ImageFormSaveRequest {
   title: string;

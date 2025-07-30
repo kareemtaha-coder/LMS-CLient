@@ -1,6 +1,8 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { catchError, Observable, of, switchMap, tap } from 'rxjs';
 import {
+  AddExampleItemRequest,
+  AddExamplesGridRequest,
   AddImageRequest,
   AddRichTextRequest,
   AddVideoRequest,
@@ -159,4 +161,31 @@ export class LessonService {
         })
       );
   }
+
+  public addExamplesGridContent(lessonId: string, request: AddExamplesGridRequest): Observable<LessonDetails | null> {
+  return this.apiService.post<string>(`lessons/${lessonId}/contents/examples-grid`, request)
+    .pipe(
+      switchMap(() => this.loadLessonById(lessonId)),
+      catchError(err => {
+        console.error('Failed to add examples grid', err);
+        // Handle error state
+        return of(null);
+      })
+    );
+}
+public addExampleItemToGrid(lessonId: string, gridContentId: string, request: AddExampleItemRequest): Observable<LessonDetails | null> {
+  const formData = new FormData();
+  formData.append('imageFile', request.imageFile);
+  formData.append('audioFile', request.audioFile);
+
+  // The API endpoint should accept the grid's content ID
+  return this.apiService.post<string>(`lessons/${lessonId}/contents/examples-grid/${gridContentId}/items`, formData)
+    .pipe(
+      switchMap(() => this.loadLessonById(lessonId)),
+      catchError(err => {
+        console.error('Failed to add example item', err);
+        return of(null);
+      })
+    );
+}
 }

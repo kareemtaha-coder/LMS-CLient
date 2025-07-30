@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { ExamplesGridContent, LessonContent } from '../../../../Core/api/api-models';
+import { ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output, signal } from '@angular/core';
+import { AddExampleItemRequest, ExamplesGridContent, LessonContent } from '../../../../Core/api/api-models';
 import { ToAbsoluteUrlPipe } from "../../../../Core/pipes/to-absolute-url.pipe";
 import { NgIf, NgFor, NgClass } from '@angular/common';
 
@@ -13,12 +13,15 @@ import { NgIf, NgFor, NgClass } from '@angular/common';
 })
 export class ExamplesGridContentComponent {
   content = input.required<LessonContent>();
+  // CORRECTED: The EventEmitter is now strongly typed
+  @Output() saveItem = new EventEmitter<AddExampleItemRequest>();
+  @Output() deleteItem = new EventEmitter<string>();
 
   gridContent = computed(() => {
     const c = this.content();
     return c.contentType === 'ExamplesGrid' ? (c as ExamplesGridContent) : null;
   });
-
+  isAdding = signal(false);
   playingAudio = signal<HTMLAudioElement | null>(null);
 
   toggleAudio(audioPlayer: HTMLAudioElement): void {
@@ -37,5 +40,9 @@ export class ExamplesGridContentComponent {
 
   onAudioEnded(): void {
     this.playingAudio.set(null);
+  }
+    onSaveItem(request: AddExampleItemRequest): void {
+    this.saveItem.emit(request);
+    this.isAdding.set(false);
   }
 }

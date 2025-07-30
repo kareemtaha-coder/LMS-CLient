@@ -12,7 +12,9 @@ import {
   AddVideoRequest,
   VideoContent,
   ImageWithCaptionContent,
-  AddImageRequest
+  AddImageRequest,
+  AddExamplesGridRequest,
+  AddExampleItemRequest
 } from '../../../Core/api/api-models';
 import { of, switchMap } from 'rxjs';
 
@@ -23,6 +25,8 @@ import { VideoContentComponent } from "../components/video-content/video-content
 import { AddVideoFormComponent } from "../add-video-form/add-video-form.component";
 import { AddImageFormComponent, ImageFormSaveRequest } from '../add-image-form/add-image-form.component';
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
+import { AddExamplesGridFormComponent } from "../add-examples-grid-form/add-examples-grid-form.component";
+import { ExamplesGridContentComponent } from "../components/examples-grid-content/examples-grid-content.component";
 
 @Component({
   selector: 'app-lesson-builder-page',
@@ -37,7 +41,9 @@ import { ImageWithCaptionContentComponent } from '../components/image-with-capti
     AddVideoFormComponent,
     AddImageFormComponent,
     ImageWithCaptionContentComponent,
-  ],
+    AddExamplesGridFormComponent,
+    ExamplesGridContentComponent
+],
   templateUrl: './lesson-builder-page.component.html',
   styleUrls: ['./lesson-builder-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,7 +54,7 @@ export class LessonBuilderPageComponent {
 
   // --- State Signals ---
   protected editingContentId = signal<string | null>(null);
-  protected addingContentType = signal<'RichText' | 'Video' | 'Image' | null>(null);
+protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesGrid' | null>(null);
   protected addingAtIndex = signal<number | 'bottom'>('bottom');
   protected collapsedState = signal<Record<string, boolean>>({});
   protected contextualMenuOpenAtIndex = signal<number | null>(null);
@@ -89,6 +95,14 @@ export class LessonBuilderPageComponent {
     const fullRequest: AddImageRequest = { ...request, sortOrder: maxSortOrder + 1 };
     this.addContentAndReorder(this.lessonService.addImageContent(this.id(), fullRequest), fullRequest);
   }
+
+handleSaveExamplesGrid(request: Omit<AddExamplesGridRequest, 'sortOrder'>): void {
+  const lesson = this.lessonService.lesson();
+  if (!lesson) return;
+  const maxSortOrder = Math.max(0, ...lesson.contents.map((c) => c.sortOrder));
+  const fullRequest = { ...request, sortOrder: maxSortOrder + 1 };
+  this.addContentAndReorder(this.lessonService.addExamplesGridContent(this.id(), fullRequest), fullRequest);
+}
 
   private addContentAndReorder(addObservable: any, fullRequest: { sortOrder: number }): void {
     const intendedIndex = this.addingAtIndex();
@@ -147,7 +161,7 @@ export class LessonBuilderPageComponent {
     this.contextualMenuOpenAtIndex.set(index);
   }
 
-  showAddNewForm(type: 'RichText' | 'Video' | 'Image', index: number | 'bottom'): void {
+  showAddNewForm(type: 'RichText' | 'Video' | 'Image' | 'ExamplesGrid', index: number | 'bottom'): void {
     this.contextualMenuOpenAtIndex.set(null);
     this.addingContentType.set(type);
     this.addingAtIndex.set(index);
@@ -173,11 +187,25 @@ export class LessonBuilderPageComponent {
         return 'border-l-red-500';
       case 'ImageWithCaption':
         return 'border-l-green-500';
+      case 'ExamplesGrid':
+        return 'border-l-purple-500';
       default:
         return 'border-l-slate-400';
     }
   }
+  // NEW: Handler to save a single example item to an existing grid
+  handleSaveExampleItem(gridContentId: string, request: AddExampleItemRequest): void {
+    this.lessonService.addExampleItemToGrid(this.id(), gridContentId, request).subscribe();
+  }
 
+  // NEW: Handler to delete a single example item
+  handleDeleteExampleItem(gridContentId: string, itemId: string): void {
+    if(confirm('هل أنت متأكد من حذف هذا المثال؟')) {
+      // Call your service method here
+      // e.g., this.lessonService.deleteExampleItem(this.id(), gridContentId, itemId).subscribe();
+      console.log(`Deleting item ${itemId} from grid ${gridContentId}`);
+    }
+  }
   // NEW: Safely gets title for any content type
     getTitle(content: LessonContent): string {
       if (content.contentType === 'RichText' && (content as RichTextContent).title) {
@@ -200,4 +228,5 @@ export class LessonBuilderPageComponent {
     this.collapsedState.update(s => { const n = {...s}; delete n[contentId]; return n; });
     this.editingContentId.set(contentId);
   }
+
 }
