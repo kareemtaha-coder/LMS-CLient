@@ -25,7 +25,6 @@ export class CourseLayoutComponent implements OnInit, OnDestroy {
   // --- Signals for the new header ---
   courseTitle = computed(() => this.curriculumService.selectedCurriculum()?.title ?? 'Course');
   lessonTitle = computed(() => this.lessonService.lesson()?.title ?? 'Lesson');
-
   constructor() {
     effect(() => {
       this.curriculumService.loadCurriculumById(this.id());

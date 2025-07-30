@@ -1,0 +1,91 @@
+/* Animation for form fade-in */
+
+
+
+/* Styles for the contextual add button */
+.contextual-add-container {
+  position: relative;
+  height: 0; /* Doesn't take up space in the layout */
+  z-index: 10;
+}
+
+.add-line {
+  position: absolute;
+  top: -10px; /* Positions it between items */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Show the line on hover of the container around the draggable item */
+div[cdkdrag]:hover + .contextual-add-container .add-line,
+.contextual-add-container:hover .add-line {
+  opacity: 1;
+}
+
+.add-line::before {
+  content: '';
+  height: 2px;
+  width: 100%;
+  background: #3b82f6; /* blue-600 */
+  position: absolute;
+}
+
+.add-button {
+  position: relative;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 9999px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white; /* Creates a nice separation from the line */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transform: scale(0.9);
+  transition: transform 0.2s ease-out;
+}
+
+
+/* General class for action buttons like Edit/Delete */
+.action-btn {
+  height: 32px;
+  width: 32px;
+  border-radius: 0.375rem; /* rounded-md */
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569; /* slate-600 */
+  transition: all 0.2s;
+}
+
+.dark .action-btn {
+  background-color: rgba(30, 41, 59, 0.7); /* slate-800 with opacity */
+  color: #cbd5e1; /* slate-300 */
+}
+/* lesson-builder-page.component.css */
+
+
+.action-btn-container {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.2s ease-in-out;
+}
+
+/* تحسين زر الإضافة السياقي */
+.add-button {
+    border: 1px solid #e2e8f0; /* light gray border */
+    background-color: white;
+    color: #3b82f6; /* blue-600 */
+}
+.dark .add-button {
+    background-color: #1e293b; /* slate-800 */
+    border-color: #334155; /* slate-700 */
+}

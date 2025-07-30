@@ -28,6 +28,16 @@
   --color-accent-yellow: #FBBF24;
   --color-accent-green: #34D399;
   --color-accent-red: #F87171;
+},
+/* تطبيق الخط والخلفية على مستوى المشروع */
+html, body {
+  font-family: 'Tajawal', sans-serif;
+  background-color: #f8f9fa; /* لون أبيض ناعم جداً للخلفية */
+}
+
+/* تعديل لون الخلفية في الوضع المظلم ليكون أعمق */
+.dark body, .dark html {
+    background-color: #0f172a; /* لون slate-900 */
 }
 
 @import 'swiper/css/thumbs';

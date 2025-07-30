@@ -51,10 +51,10 @@ export interface CreateCurriculumRequest {
  * [cite_start]As per response from `GET /api/Curriculums/{id}`. [cite: 3682-3687]
  */
 export interface CurriculumDetails {
-    id: string; // guid
-    title: string;
-    introduction: string;
-    // ... other details
+  id: string; // guid
+  title: string;
+  introduction: string;
+  // ... other details
 }
 
 /**
@@ -84,10 +84,10 @@ export interface ChapterWithLessons {
  * As per response from `GET /api/Curriculums/{id}`.
  */
 export interface CurriculumDetails {
-    id: string; // guid
-    title: string;
-    introduction: string;
-    chapters: ChapterWithLessons[]; // <-- Add this array
+  id: string; // guid
+  title: string;
+  introduction: string;
+  chapters: ChapterWithLessons[]; // <-- Add this array
 }
 /**
  * Represents the request body for adding a new chapter.
@@ -113,23 +113,36 @@ export interface UpdateChapterRequest {
 /**
  * [cite_start]Represents the possible types for a note within a RichText content block. [cite: 3822]
  */
-export type NoteType = 'Normal' | 'Important' | 'Warning' | 'Tip';
+export enum NoteType {
+  Normal = 0,
+  Important = 1,
+  Warning = 2,
+  Tip = 3,
+}
 
 /**
  * [cite_start]Represents the possible content types for a lesson. [cite: 3773-3793]
  */
-export type ContentType = 'RichText' | 'Video' | 'ImageWithCaption' | 'ExamplesGrid';
+export type ContentType =
+  | 'RichText'
+  | 'Video'
+  | 'ImageWithCaption'
+  | 'ExamplesGrid';
+export interface ContentTitle {
+  value: string;
+}
 
 /**
  * Represents a summary of a lesson within a chapter.
  * [cite_start]As per response from `GET /api/Chapters/{chapterId}/lessons`. [cite: 3760-3763]
  */
 export interface LessonSummary {
-  id: string; // guid
+  id: string;
   title: string;
   sortOrder: number;
+  status: number; // 0 = Draft, 1 = Published
+  contentCount: number; // <-- الإضافة الجديدة المطلوبة
 }
-
 /**
  * Represents the full details of a lesson, including all its content blocks.
  * [cite_start]As per response from `GET /api/Lessons/{lessonId}`. [cite: 3769-3783]
@@ -144,12 +157,21 @@ export interface LessonDetails {
 // --- Discriminated Union for Lesson Content ---
 
 interface LessonContentBase {
-  id: string; // guid
+  id: string;
   sortOrder: number;
+  title: ContentTitle;
 }
 
 export interface RichTextContent extends LessonContentBase {
   contentType: 'RichText';
+  arabicText: string;
+  englishText: string;
+  noteType: NoteType;
+}
+
+export interface AddRichTextLessonRequest {
+  title: string;
+  sortOrder: number;
   arabicText: string;
   englishText: string;
   noteType: NoteType;
@@ -178,8 +200,11 @@ export interface ExampleItem {
 }
 
 /** A union of all possible lesson content types. */
-export type LessonContent = RichTextContent | VideoContent | ImageWithCaptionContent | ExamplesGridContent;
-
+export type LessonContent =
+  | RichTextContent
+  | VideoContent
+  | ImageWithCaptionContent
+  | ExamplesGridContent;
 
 // =================================================================
 // #region Lesson Content API Requests
@@ -199,17 +224,18 @@ export interface AddLessonRequest {
  * [cite_start]As per `POST /api/lessons/{lessonId}/contents/rich-text`. [cite: 3818-3823]
  */
 export interface AddRichTextRequest {
+  title: string; // The form will send a simple string
   sortOrder: number;
   arabicText: string;
   englishText: string;
   noteType: NoteType;
 }
-
 /**
  * Represents the request body for adding a video content block.
  * [cite_start]As per `POST /api/lessons/{lessonId}/contents/video`. [cite: 3829-3832]
  */
 export interface AddVideoRequest {
+  title: string;
   sortOrder: number;
   videoUrl: string;
 }
@@ -219,9 +245,22 @@ export interface AddVideoRequest {
  * [cite_start]As per `POST /api/lessons/{lessonId}/contents/examples-grid`. [cite: 3844-3848]
  */
 export interface AddExamplesGridRequest {
+  title: string; // The form will send a simple string
   sortOrder: number;
 }
 
+
+export interface ImageFormSaveRequest {
+  title: string;
+  caption: string;
+  imageFile: File;
+}
+export interface AddImageRequest {
+  title: string;
+  caption?: string;
+  sortOrder: number;
+  imageFile: File;
+}
 /**
  * Represents the request body for reordering content within a lesson.
  * [cite_start]As per `PUT /api/lessons/{lessonId}/contents/reorder`. [cite: 3855-3861]
@@ -235,9 +274,10 @@ export interface ReorderContentsRequest {
  * [cite_start]As per `PUT /api/contents/{contentId}/rich-text`. [cite: 3867-3871]
  */
 export interface UpdateRichTextRequest {
-    arabicText: string;
-    englishText: string;
-    noteType: NoteType;
+  arabicText: string;
+  englishText: string;
+  noteType: NoteType;
+  title: string; // The form will send a simple string
 }
 
 /**
@@ -245,5 +285,6 @@ export interface UpdateRichTextRequest {
  * [cite_start]As per `PUT /api/contents/{contentId}/video`. [cite: 3876-3878]
  */
 export interface UpdateVideoRequest {
-    videoUrl: string;
+  videoUrl: string;
+  title: string; // The form will send a simple string
 }

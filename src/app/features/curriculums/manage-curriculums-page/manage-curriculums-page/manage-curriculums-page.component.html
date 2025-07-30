@@ -1,0 +1,45 @@
+<div class="p-4 md:p-6 lg:p-8 bg-slate-100 dark:bg-slate-900 min-h-full">
+  <div class="max-w-5xl mx-auto space-y-12">
+
+    <section>
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">لوحة تحكم المناهج</h1>
+        <p class="mt-2 text-lg text-slate-600 dark:text-slate-400">ابدأ بإنشاء منهج جديد أو قم بإدارة المناهج الحالية من هنا.</p>
+      </header>
+      <app-curriculum-form
+        [isSubmitting]="curriculumService.creating()"
+        (save)="handleCreateCurriculum($event)">
+      </app-curriculum-form>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">المناهج الحالية</h2>
+
+      @if (curriculumService.loading() && curriculumService.curriculums().length === 0) {
+        <div class="space-y-4 animate-pulse">
+          <div class="h-16 w-full bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+          <div class="h-16 w-full bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+        </div>
+      } @else {
+        <div class="space-y-4">
+          @for (curriculum of curriculumService.curriculums(); track curriculum.id) {
+            <div class="p-4 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-transparent hover:border-blue-500 flex justify-between items-center transition-all duration-300">
+              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ curriculum.title }}</span>
+              <div class="flex items-center gap-4">
+                <a [routerLink]="['/manage/curriculums', curriculum.id]" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm transition-transform hover:scale-105">
+                  بناء المنهج
+                </a>
+                <button class="text-sm font-medium text-red-600 dark:text-red-500 hover:underline">حذف</button>
+              </div>
+            </div>
+          } @empty {
+            <div class="text-center py-12 px-6 bg-white dark:bg-slate-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-700">
+              <h3 class="text-xl font-bold text-slate-700 dark:text-slate-300">لم تقم بإنشاء أي منهج بعد</h3>
+              <p class="text-slate-500 dark:text-slate-400 mt-2">استخدم النموذج أعلاه للبدء!</p>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</div>

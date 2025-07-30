@@ -1,12 +1,9 @@
 import { ActivatedRouteSnapshot, ResolveFn, Routes } from '@angular/router';
 import { CourseLayoutComponent } from './features/course-layout/course-layout.component';
 import { LessonLayoutComponent } from './features/lessons/lesson-layout/lesson-layout.component';
-import { inject } from '@angular/core';
-import { LessonContent, LessonDetails } from './Core/api/api-models';
+import { LessonDetails } from './Core/api/api-models';
 import { LessonService } from './features/lessons/lesson.service';
-import { ContentHostComponent } from './features/lessons/content-host/content-host.component';
-
-// Resolver for the entire lesson object.
+import { inject } from '@angular/core';
 const lessonResolver: ResolveFn<LessonDetails | null> = (route: ActivatedRouteSnapshot) => {
   const lessonService = inject(LessonService);
   const lessonId = route.paramMap.get('lessonId');
@@ -15,26 +12,59 @@ const lessonResolver: ResolveFn<LessonDetails | null> = (route: ActivatedRouteSn
   }
   return null;
 };
-
-// The content resolver is no longer needed by the router directly.
-// const contentResolver: ResolveFn<LessonContent | undefined> = ...
-
 export const routes: Routes = [
-  { path: '', redirectTo: 'curriculums', pathMatch: 'full' },
-  { path: 'curriculums', loadComponent: () => import('./features/curriculums/curriculum-list/curriculum-list.component').then(m => m.CurriculumListComponent) },
+  // ==================================================
+  // #1: المسارات العامة (واجهة الطالب/الزائر)
+  // ==================================================
   {
+    // الصفحة الرئيسية التي تعرض قائمة المناهج المتاحة للتصفح
+    path: 'curriculums',
+    loadComponent: () => import('./features/curriculums/curriculum-list/curriculum-list.component').then(m => m.CurriculumListComponent)
+  },
+  {
+    // التخطيط الخاص بعرض منهج معين ودروسه
     path: 'course/:id',
     component: CourseLayoutComponent,
     children: [
       {
         path: 'lessons/:lessonId',
         component: LessonLayoutComponent,
-        resolve: {
-          lesson: lessonResolver
-        },
-        // The children array has been REMOVED from here to prevent the URL from changing.
-        // Content will now be managed by the LessonLayoutComponent itself.
-      }
+        resolve: { lesson: lessonResolver }
+      },
+      // مستقبلاً، يمكن إضافة توجيه تلقائي لأول درس في المنهج هنا
     ]
   },
+
+  // ==================================================
+  // #2: مسارات الإدارة (واجهة مدير المحتوى)
+  // ==================================================
+    {
+    path: 'manage',
+    children: [
+      {
+        // هذه هي صفحة الإدارة الرئيسية (Hub)
+        // ستحتوي على نموذج الإنشاء وقائمة المناهج معًا
+        path: 'curriculums',
+        loadComponent: () => import('./features/curriculums/manage-curriculums-page/manage-curriculums-page/manage-curriculums-page.component').then(m => m.ManageCurriculumsPageComponent)
+      },
+      {
+        // هذه هي صفحة "البنّاء" لمنهج معين لإدارة فصوله ودروسه
+        path: 'curriculums/:id',
+        loadComponent: () => import('./features/curriculums/curriculum-builder-page/curriculum-builder-page/curriculum-builder-page.component').then(m => m.CurriculumBuilderPageComponent)
+      },
+      // توجيه المسار الرئيسي /manage إلى صفحة إدارة المناهج
+      { path: '', redirectTo: 'curriculums', pathMatch: 'full' }
+      ,{
+        path: 'lessons/:id',
+        loadComponent: () => import('./features/lessons/lesson-builder-page/lesson-builder-page.component').then(m => m.LessonBuilderPageComponent),
+      },
+    ]
+  },
+
+
+  // ==================================================
+  // #3: المسارات الافتراضية والبديلة
+  // ==================================================
+  { path: '', redirectTo: '/curriculums', pathMatch: 'full' },
+  { path: '**', redirectTo: '/curriculums' } // أو يمكنك إنشاء مكون PageNotFoundComponent
 ];

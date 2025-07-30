@@ -6,7 +6,7 @@ import { NgIf, NgFor, NgClass } from '@angular/common';
 @Component({
   selector: 'app-examples-grid-content',
   standalone: true,
-  imports: [ToAbsoluteUrlPipe, NgIf, NgFor, NgClass],
+  imports: [ToAbsoluteUrlPipe, NgClass],
   templateUrl: './examples-grid-content.component.html', // We will use a separate file for the template
   styleUrls: ['./examples-grid-content.component.css'],   // And a separate file for styles
   changeDetection: ChangeDetectionStrategy.OnPush,

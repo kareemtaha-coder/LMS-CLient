@@ -1,0 +1,103 @@
+@if (curriculumService.selectedCurriculum(); as curriculum) {
+<div class="p-4 md:p-6 lg:p-8 bg-slate-50 dark:bg-slate-900/90 min-h-full">
+  <div class="max-w-4xl mx-auto">
+    <header class="mb-8">
+      <a
+        routerLink="/manage/curriculums"
+        class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline mb-4"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        العودة إلى لوحة التحكم
+      </a>
+      <h1
+        class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100"
+      >
+        {{ curriculum.title }}
+      </h1>
+      <p class="mt-2 text-lg text-slate-600 dark:text-slate-400">
+        {{ curriculum.introduction }}
+      </p>
+    </header>
+
+    <main class="bg-transparent p-0 border-0 shadow-none">
+      <div class="flex justify-between items-center mb-6">
+        <h2
+          class="text-2xl font-bold text-slate-900 dark:text-slate-100"
+        >
+          محتويات المنهج
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        @for (chapter of curriculum.chapters; track chapter.id) {
+        <app-chapter-accordion-form
+          [chapter]="chapter"
+          [isExpanded]="expandedChapterId() === chapter.id"
+          (toggle)="toggleChapter(chapter.id)"
+          (delete)="promptDeleteItem(chapter)"
+          (updateTitle)="handleUpdateChapter($event, chapter.id)"
+          (addLesson)="handleAddLesson($event, chapter.id, chapter.lessons.length)"
+          (deleteLesson)="handleDeleteLesson($event)"
+            (setLessonStatus)="handleSetLessonStatus($event)">
+          </app-chapter-accordion-form>
+        <br/>
+        } @empty {
+        <div
+          class="text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-700"
+        >
+          <h3 class="text-xl font-bold text-slate-700 dark:text-slate-300">
+            المنهج فارغ
+          </h3>
+          <p class="text-slate-500 dark:text-slate-400 mt-1">
+            ابدأ بإضافة فصل جديد لتشكيل هيكل المنهج.
+          </p>
+        </div>
+        }
+      </div>
+
+      <hr class="my-8 border-dashed border-slate-200 dark:border-slate-700" />
+
+      <div>
+        <h3
+          class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-3"
+        >
+          إضافة فصل جديد
+        </h3>
+        <app-add-chapter-form
+          (save)="handleAddChapter($event)"
+        ></app-add-chapter-form>
+      </div>
+    </main>
+  </div>
+</div>
+
+@if (showDeleteConfirmation() && itemToDelete(); as item) {
+<app-confirmation-dialog
+  [title]="'تأكيد الحذف'"
+  [message]="
+    'هل أنت متأكد من رغبتك في حذف \' ' +
+    item.title +
+    ' \'؟ سيتم حذف جميع المحتويات المرتبطة به بشكل دائم.'
+  "
+  (confirm)="handleConfirmDelete()"
+  (cancel)="closeConfirmationDialog()"
+>
+</app-confirmation-dialog>
+} } @else if (curriculumService.loading()) {
+<div class="flex items-center justify-center min-h-screen">
+  <p class="text-lg text-slate-500 dark:text-slate-400">
+    جاري تحميل بيانات البنّاء...
+  </p>
+</div>
+}

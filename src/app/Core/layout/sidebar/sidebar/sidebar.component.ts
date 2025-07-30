@@ -10,7 +10,10 @@ interface NavLink {
   label: string;
   iconName: IconName;
 }
-
+interface NavGroup {
+  title: string;
+  links: NavLink[];
+}
 @Component({
   selector: 'app-sidebar',
   standalone: true, // من الأفضل استخدام المكونات المستقلة (Standalone) في Angular الحديث
@@ -24,16 +27,27 @@ export class SidebarComponent {
   isCollapsed = model(false);
 
   // قائمة الروابط تبقى كما هي
-  navLinks = signal<NavLink[]>([
+  navGroups = signal<NavGroup[]>([
     {
-      path: '/manage/curriculums',
-      label: 'إدارة المناهج',
-      iconName: 'edit'
+      title: 'تصفح',
+      links: [
+        {
+          path: '/curriculums',
+          label: 'عرض المناهج',
+          iconName: 'book-open'
+        }
+      ]
     },
     {
-      path: '/curriculums',
-      label: 'عرض المناهج',
-      iconName: 'book-open'
-    },
+      title: 'إدارة المحتوى',
+      links: [
+        {
+          path: '/manage/curriculums',
+          label: 'إدارة المناهج',
+          iconName: 'edit'
+        }
+        // مستقبلاً، يمكنك إضافة روابط إدارة المستخدمين أو الإعدادات هنا
+      ]
+    }
   ]);
 }

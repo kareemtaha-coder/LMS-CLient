@@ -1,6 +1,13 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
-import { catchError, Observable, of, tap } from 'rxjs';
-import { LessonContent, LessonDetails } from '../../Core/api/api-models';
+import { catchError, Observable, of, switchMap, tap } from 'rxjs';
+import {
+  AddImageRequest,
+  AddRichTextRequest,
+  AddVideoRequest,
+  LessonContent,
+  LessonDetails,
+  ReorderContentsRequest,
+} from '../../Core/api/api-models';
 import { ApiService } from '../../Core/api/api.service';
 
 interface LessonState {
@@ -10,7 +17,7 @@ interface LessonState {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LessonService {
   private apiService = inject(ApiService);
@@ -25,24 +32,25 @@ export class LessonService {
   public readonly loading = () => this.#state().loading;
   public readonly error = () => this.#state().error;
 
-  public readonly selectedContent = signal<LessonContent | undefined>(undefined);
+  public readonly selectedContent = signal<LessonContent | undefined>(
+    undefined
+  );
 
   // --- الإضافة الجديدة ---
   // Signal لتخزين معرف الدرس النشط حالياً
   public readonly activeLessonId = signal<string | null>(null);
 
-
+  // =======================================================
+  // REVERTING THE CHANGE: The method now returns an Observable
+  // =======================================================
   loadLessonById(id: string): Observable<LessonDetails | null> {
     this.#state.set({ lesson: null, loading: true, error: null });
     this.selectedContent.set(undefined);
-
-    // --- التعديل الجديد ---
-    // عند بدء تحميل درس جديد، قم بتحديث المعرف النشط فوراً
     this.activeLessonId.set(id);
 
     return this.apiService.get<LessonDetails>(`lessons/${id}`).pipe(
-      tap(response => {
-        this.#state.update(state => ({
+      tap((response) => {
+        this.#state.update((state) => ({
           ...state,
           lesson: response,
           loading: false,
@@ -52,19 +60,103 @@ export class LessonService {
         }
       }),
       catchError(() => {
-        this.#state.update(state => ({
+        this.#state.update((state) => ({
           ...state,
           loading: false,
-          error: 'Failed to load lesson details.'
+          error: 'Failed to load lesson details.',
         }));
-        // If loading fails, clear the active lesson ID
         this.activeLessonId.set(null);
         return of(null);
       })
-    );
+    ); // <-- REMOVED .subscribe() from here
   }
 
   public selectContent(content: LessonContent | undefined): void {
     this.selectedContent.set(content);
+  }
+
+  // ############ START: MODIFIED SECTION ############
+  // سنقوم بإرجاع السلسلة بدلاً من الاشتراك فيها
+  public addRichTextContent(
+    lessonId: string,
+    request: AddRichTextRequest
+  ): Observable<LessonDetails | null> {
+    return this.apiService
+      .post<string>(`lessons/${lessonId}/contents/rich-text`, request)
+      .pipe(
+        switchMap(() => this.loadLessonById(lessonId)),
+        catchError((err) => {
+          console.error('Failed to add rich text content', err);
+          this.#state.update((s) => ({
+            ...s,
+            loading: false,
+            error: 'Failed to add content.',
+          }));
+          return of(null);
+        })
+      );
+    //  <-- REMOVED .subscribe()
+  }
+
+  public reorderLessonContents(
+    lessonId: string,
+    orderedContentIds: string[]
+  ): Observable<LessonDetails | null> {
+    const request: ReorderContentsRequest = { orderedContentIds };
+    return this.apiService
+      .put(`lessons/${lessonId}/contents/reorder`, request)
+      .pipe(
+        switchMap(() => this.loadLessonById(lessonId)),
+        catchError((err) => {
+          console.error('Failed to reorder content', err);
+          return of(null);
+        })
+      );
+    //  <-- REMOVED .subscribe()
+  }
+
+  public addVideoContent(
+    lessonId: string,
+    request: AddVideoRequest & { sortOrder: number }
+  ): Observable<LessonDetails | null> {
+    // افترض أن هذا هو المسار الصحيح في الـ API
+    return this.apiService
+      .post<string>(`lessons/${lessonId}/contents/video`, request)
+      .pipe(
+        switchMap(() => this.loadLessonById(lessonId)),
+        catchError((err) => {
+          console.error('Failed to add video content', err);
+          this.#state.update((s) => ({
+            ...s,
+            loading: false,
+            error: 'Failed to add video.',
+          }));
+          return of(null);
+        })
+      );
+  }
+
+  public addImageContent(
+    lessonId: string,
+    request: AddImageRequest
+  ): Observable<LessonDetails | null> {
+    // We need to send FormData for file uploads
+    const formData = new FormData();
+    formData.append('title', request.title);
+    formData.append('caption', request.caption || '');
+    formData.append('sortOrder', request.sortOrder.toString());
+    formData.append('imageFile', request.imageFile);
+
+    // Assumes your apiService can handle FormData
+    return this.apiService
+      .post<string>(`lessons/${lessonId}/contents/image-with-caption`, formData)
+      .pipe(
+        switchMap(() => this.loadLessonById(lessonId)),
+        catchError((err) => {
+          console.error('Failed to add image content', err);
+          // Handle error state
+          return of(null);
+        })
+      );
   }
 }

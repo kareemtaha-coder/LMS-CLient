@@ -30,13 +30,13 @@ export class RichTextContentComponent {
     if (!content) return '';
 
     switch (content.noteType) {
-      case 'Important':
+      case 0:
         return 'text-blue-600 dark:text-blue-400';
-      case 'Warning':
+      case 1:
         return 'text-amber-500 dark:text-amber-400';
-      case 'Tip':
+      case 2:
         return 'text-teal-500 dark:text-teal-400';
-      case 'Normal':
+      case 3:
       default:
         return 'text-slate-800 dark:text-slate-200';
     }
