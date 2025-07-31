@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, si
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurriculumService } from '../../curriculum.service';
-import { AddChapterRequest, AddLessonRequest, ChapterWithLessons, UpdateChapterRequest } from '../../../../Core/api/api-models';
+import { AddChapterRequest, AddLessonRequest, ChapterWithLessons, UpdateChapterRequest, UpdateLessonTitleRequest } from '../../../../Core/api/api-models';
 import { AddChapterFormComponent } from '../../add-chapter-form/add-chapter-form.component';
 import { InlineEditComponent } from "../../../../shared/ui/inline-edit/inline-edit.component";
 import { ConfirmationDialogComponent } from "../../../../shared/ui/confirmation-dialog/confirmation-dialog.component";
@@ -126,5 +126,13 @@ export class CurriculumBuilderPageComponent {
     } else {
       this.curriculumService.unpublishLesson(this.id(), event.lessonId);
     }
+  }
+
+    /**
+   * Handles the lesson title update event from the accordion component.
+   */
+  handleUpdateLesson(event: { lessonId: string, newTitle: string }): void {
+    const request: UpdateLessonTitleRequest = { title: event.newTitle };
+    this.curriculumService.updateLessonTitle(this.id(), event.lessonId, request);
   }
 }

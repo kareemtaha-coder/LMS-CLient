@@ -14,7 +14,10 @@ import {
   ImageWithCaptionContent,
   AddImageRequest,
   AddExamplesGridRequest,
-  AddExampleItemRequest
+  AddExampleItemRequest,
+  UpdateRichTextRequest,
+  UpdateVideoRequest,
+  UpdateImageRequest
 } from '../../../Core/api/api-models';
 import { of, switchMap } from 'rxjs';
 
@@ -96,13 +99,7 @@ protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesG
     this.addContentAndReorder(this.lessonService.addImageContent(this.id(), fullRequest), fullRequest);
   }
 
-handleSaveExamplesGrid(request: Omit<AddExamplesGridRequest, 'sortOrder'>): void {
-  const lesson = this.lessonService.lesson();
-  if (!lesson) return;
-  const maxSortOrder = Math.max(0, ...lesson.contents.map((c) => c.sortOrder));
-  const fullRequest = { ...request, sortOrder: maxSortOrder + 1 };
-  this.addContentAndReorder(this.lessonService.addExamplesGridContent(this.id(), fullRequest), fullRequest);
-}
+
 
   private addContentAndReorder(addObservable: any, fullRequest: { sortOrder: number }): void {
     const intendedIndex = this.addingAtIndex();
@@ -122,22 +119,7 @@ handleSaveExamplesGrid(request: Omit<AddExamplesGridRequest, 'sortOrder'>): void
     ).subscribe();
   }
 
-  // --- Update & Delete Handlers ---
 
-  handleUpdateRichText(contentId: string, request: Omit<AddRichTextRequest, 'sortOrder'>): void {
-    console.log('Updating RichText:', contentId, request);
-    this.editingContentId.set(null);
-  }
-
-  handleUpdateVideo(contentId: string, request: Omit<AddVideoRequest, 'sortOrder'>): void {
-    console.log('Updating Video:', contentId, request);
-    this.editingContentId.set(null);
-  }
-
-  handleUpdateImage(contentId: string, request: ImageFormSaveRequest): void {
-    console.log('Updating Image:', contentId, request);
-    this.editingContentId.set(null);
-  }
 
   handleDeleteContent(contentId: string): void {
     if (confirm('هل أنت متأكد من رغبتك في حذف قطعة المحتوى هذه؟')) {
@@ -193,19 +175,81 @@ handleSaveExamplesGrid(request: Omit<AddExamplesGridRequest, 'sortOrder'>): void
         return 'border-l-slate-400';
     }
   }
-  // NEW: Handler to save a single example item to an existing grid
-  handleSaveExampleItem(gridContentId: string, request: AddExampleItemRequest): void {
-    this.lessonService.addExampleItemToGrid(this.id(), gridContentId, request).subscribe();
+handleSaveExamplesGrid(request: Omit<AddExamplesGridRequest, 'sortOrder'>): void {
+    const lesson = this.lessonService.lesson();
+    if (!lesson) return;
+
+    // FIXED: (TS7015) The index expression error is resolved by checking the type of addingAtIndex
+    let sortOrder: number;
+    const intendedIndex = this.addingAtIndex();
+    if (intendedIndex === 'bottom' || lesson.contents.length === 0) {
+      sortOrder = Math.max(0, ...lesson.contents.map((c) => c.sortOrder)) + 1;
+    } else if (typeof intendedIndex === 'number' && lesson.contents[intendedIndex]) {
+      // For contextual add, we take the sortOrder of the item at the index.
+      // The re-ordering logic will place the new item correctly.
+      sortOrder = lesson.contents[intendedIndex].sortOrder;
+    } else {
+      // Fallback for safety
+      sortOrder = Math.max(0, ...lesson.contents.map((c) => c.sortOrder)) + 1;
+    }
+
+    // FIXED: (TS2345) The request now correctly includes the title
+    const fullRequest: AddExamplesGridRequest = { ...request, sortOrder: sortOrder };
+    this.addContentAndReorder(this.lessonService.addExamplesGridContent(this.id(), fullRequest), fullRequest);
   }
 
-  // NEW: Handler to delete a single example item
-  handleDeleteExampleItem(gridContentId: string, itemId: string): void {
-    if(confirm('هل أنت متأكد من حذف هذا المثال؟')) {
-      // Call your service method here
-      // e.g., this.lessonService.deleteExampleItem(this.id(), gridContentId, itemId).subscribe();
-      console.log(`Deleting item ${itemId} from grid ${gridContentId}`);
-    }
+  handleSaveExampleItem(gridContentId: string, request: AddExampleItemRequest): void {
+  console.log('1. [Component] Preparing to save item. Grid Content ID:', gridContentId);
+  console.log('2. [Component] Request data:', request);
+
+  // تأكد من وجود ملف الصورة على الأقل
+  if (!request.imageFile) {
+    console.error('Save aborted: Image file is missing.');
+    return;
   }
+
+  this.lessonService.addExampleItemToGrid(this.id(), gridContentId, request).subscribe({
+    next: (updatedLesson) => {
+      if (updatedLesson) {
+        console.log('5. [Component] Success! Lesson has been updated.', updatedLesson);
+      } else {
+        console.warn('5. [Component] Call succeeded but the service returned null.');
+      }
+    },
+    error: (err) => {
+      console.error('5. [Component] An error occurred:', err);
+      alert('فشل إضافة المثال. يرجى مراجعة الـ Console لمزيد من التفاصيل.');
+    }
+  });
+}
+
+/**
+ * Handles the user's request to delete an example item.
+ * It calls the corresponding method in LessonService to perform the action.
+ * @param gridContentId The ID of the parent ExamplesGrid content.
+ * @param itemId The ID of the item to be deleted.
+ */
+handleDeleteExampleItem(gridContentId: string, itemId: string): void {
+  // 1. عرض رسالة تأكيد للمستخدم
+  if (confirm('هل أنت متأكد من حذف هذا المثال؟')) {
+
+    // 2. استدعاء الدالة من الخدمة
+    this.lessonService.deleteExampleItem(gridContentId, itemId).subscribe({
+      next: (updatedLesson) => {
+        if (updatedLesson) {
+          console.log(`تم حذف العنصر ${itemId} بنجاح.`);
+          // لا حاجة لعمل أي شيء آخر هنا، فالخدمة قامت بتحديث الحالة بالفعل
+        }
+      },
+      error: (err) => {
+        console.error('حدث خطأ أثناء محاولة حذف العنصر.', err);
+        // يمكنك هنا عرض رسالة خطأ للمستخدم
+      }
+    });
+  }
+}
+
+
   // NEW: Safely gets title for any content type
     getTitle(content: LessonContent): string {
       if (content.contentType === 'RichText' && (content as RichTextContent).title) {
@@ -228,5 +272,27 @@ handleSaveExamplesGrid(request: Omit<AddExamplesGridRequest, 'sortOrder'>): void
     this.collapsedState.update(s => { const n = {...s}; delete n[contentId]; return n; });
     this.editingContentId.set(contentId);
   }
+
+
+  handleUpdateRichText(contentId: string, request: UpdateRichTextRequest): void {
+  this.lessonService.updateRichTextContent(this.id(), contentId, request).subscribe({
+    next: () => this.editingContentId.set(null), // Exit edit mode on success
+    error: (err) => console.error("Update failed", err)
+  });
+}
+
+handleUpdateVideo(contentId: string, request: UpdateVideoRequest): void {
+  this.lessonService.updateVideoContent(this.id(), contentId, request).subscribe({
+    next: () => this.editingContentId.set(null), // Exit edit mode on success
+    error: (err) => console.error("Update failed", err)
+  });
+}
+
+handleUpdateImage(contentId: string, request: UpdateImageRequest): void {
+  this.lessonService.updateImageContent(this.id(), contentId, request).subscribe({
+    next: () => this.editingContentId.set(null), // Exit edit mode on success
+    error: (err) => console.error("Update failed", err)
+  });
+}
 
 }

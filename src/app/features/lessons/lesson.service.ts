@@ -9,6 +9,12 @@ import {
   LessonContent,
   LessonDetails,
   ReorderContentsRequest,
+  ExamplesGridContent,
+  UpdateImageRequest,
+  UpdateVideoRequest,
+  VideoContent,
+  RichTextContent,
+  UpdateRichTextRequest,
 } from '../../Core/api/api-models';
 import { ApiService } from '../../Core/api/api.service';
 
@@ -162,30 +168,193 @@ export class LessonService {
       );
   }
 
-  public addExamplesGridContent(lessonId: string, request: AddExamplesGridRequest): Observable<LessonDetails | null> {
-  return this.apiService.post<string>(`lessons/${lessonId}/contents/examples-grid`, request)
-    .pipe(
-      switchMap(() => this.loadLessonById(lessonId)),
-      catchError(err => {
-        console.error('Failed to add examples grid', err);
-        // Handle error state
-        return of(null);
-      })
-    );
-}
-public addExampleItemToGrid(lessonId: string, gridContentId: string, request: AddExampleItemRequest): Observable<LessonDetails | null> {
-  const formData = new FormData();
-  formData.append('imageFile', request.imageFile);
-  formData.append('audioFile', request.audioFile);
+  public addExamplesGridContent(
+    lessonId: string,
+    request: AddExamplesGridRequest
+  ): Observable<LessonDetails | null> {
+    return this.apiService
+      .post<string>(`lessons/${lessonId}/contents/examples-grid`, request)
+      .pipe(
+        switchMap(() => this.loadLessonById(lessonId)),
+        catchError((err) => {
+          console.error('Failed to add examples grid', err);
+          // Handle error state
+          return of(null);
+        })
+      );
+  }
 
-  // The API endpoint should accept the grid's content ID
-  return this.apiService.post<string>(`lessons/${lessonId}/contents/examples-grid/${gridContentId}/items`, formData)
-    .pipe(
-      switchMap(() => this.loadLessonById(lessonId)),
-      catchError(err => {
-        console.error('Failed to add example item', err);
+  /**
+   * Deletes a single example item from a grid.
+   * [cite_start]This corresponds to the API endpoint: DELETE /api/example-items/{itemId} [cite: 266]
+   * @param gridContentId The ID of the parent grid content block (for state update).
+   * @param itemId The ID of the example item to delete.
+   * @returns An observable of the updated lesson details or null on error.
+   */
+  public deleteExampleItem(
+    gridContentId: string,
+    itemId: string
+  ): Observable<LessonDetails | null> {
+    return this.apiService
+      .delete(`contents/${gridContentId}/example-items/${itemId}`)
+      .pipe(
+        tap(() => {
+          // Optimistically update local state for better performance
+          const currentLesson = this.#state().lesson;
+          if (currentLesson) {
+            const updatedContents = currentLesson.contents.map((content) => {
+              // Find the correct grid by its ID
+              if (
+                content.id === gridContentId &&
+                content.contentType === 'ExamplesGrid'
+              ) {
+                const grid = content as ExamplesGridContent;
+                // Filter out the deleted item from the array
+                const updatedItems = grid.exampleItems.filter(
+                  (item) => item.id !== itemId
+                );
+                // Return the updated grid content
+                return { ...grid, exampleItems: updatedItems };
+              }
+              return content;
+            });
+            // Set the new state with the updated contents
+            this.#state.update((s) => ({
+              ...s,
+              lesson: { ...currentLesson, contents: updatedContents },
+            }));
+          }
+        }),
+        // Return the updated lesson from the state to the component
+        switchMap(() => of(this.#state().lesson)),
+        catchError((err) => {
+          console.error(`Failed to delete example item ${itemId}`, err);
+          return of(null);
+        })
+      );
+  }
+
+  public addExampleItemToGrid(
+    lessonId: string,
+    gridContentId: string,
+    request: AddExampleItemRequest
+  ): Observable<LessonDetails | null> {
+    const formData = new FormData();
+    formData.append('imageFile', request.imageFile);
+
+    if (request.audioFile) {
+      formData.append('audioFile', request.audioFile);
+    }
+
+    const endpoint = `contents/${gridContentId}/example-items`;
+
+    console.log('3. [Service] Calling API endpoint:', endpoint);
+    console.log('4. [Service] Sending FormData:', formData);
+    // لطباعة محتويات FormData
+    for (let [key, value] of formData.entries()) {
+      console.log(`   - ${key}:`, value);
+    }
+
+    return this.apiService.post<string>(endpoint, formData).pipe(
+      switchMap((response) => {
+        console.log(
+          '[Service] API call successful, response (new item ID):',
+          response
+        );
+        // إعادة تحميل الدرس بالكامل لتحديث الواجهة بالبيانات الجديدة
+        return this.loadLessonById(lessonId);
+      }),
+      catchError((err) => {
+        console.error('[Service] API call failed.', err);
         return of(null);
       })
     );
+  }
+/**
+ * Updates an existing Rich Text content block.
+ */
+public updateRichTextContent(lessonId: string, contentId: string, request: UpdateRichTextRequest): Observable<LessonDetails | null> {
+  const endpoint = `lessons/${lessonId}/contents/${contentId}/rich-text`;
+  return this.apiService.put(endpoint, request).pipe(
+    tap(() => {
+      const lesson = this.#state().lesson;
+      if (lesson) {
+        const updatedContents = lesson.contents.map(content => {
+          if (content.id === contentId && content.contentType === 'RichText') {
+            // Destructure the request to separate the title string
+            const { title, ...restOfRequest } = request;
+            // Reconstruct the object, creating the correct title structure
+            return {
+              ...content,
+              ...restOfRequest,
+              title // FIXED: Create the ContentTitle object
+            };
+          }
+          return content;
+        });
+        this.#state.update(s => ({ ...s, lesson: { ...lesson, contents: updatedContents } }));
+      }
+    }),
+    switchMap(() => of(this.#state().lesson)),
+    catchError(err => {
+      console.error('Failed to update rich text content', err);
+      return of(null);
+    })
+  );
+}
+
+/**
+ * Updates an existing Video content block.
+ */
+public updateVideoContent(lessonId: string, contentId: string, request: UpdateVideoRequest): Observable<LessonDetails | null> {
+  const endpoint = `lessons/${lessonId}/contents/${contentId}/video`;
+  return this.apiService.put(endpoint, request).pipe(
+    tap(() => {
+      const lesson = this.#state().lesson;
+      if (lesson) {
+        const updatedContents = lesson.contents.map(content => {
+          if (content.id === contentId && content.contentType === 'Video') {
+            // Destructure the request to separate the title string
+            const { title, ...restOfRequest } = request;
+            // Reconstruct the object, creating the correct title structure
+            return {
+              ...content,
+              ...restOfRequest,
+              title: title  // FIXED: Create the ContentTitle object
+            };
+          }
+          return content;
+        });
+        this.#state.update(s => ({ ...s, lesson: { ...lesson, contents: updatedContents } }));
+      }
+    }),
+    switchMap(() => of(this.#state().lesson)),
+    catchError(err => {
+      console.error('Failed to update video content', err);
+      return of(null);
+    })
+  );
+}
+/**
+ * Updates an existing Image with Caption content block.
+ * Reloads the lesson on success to get the new image URL.
+ */
+public updateImageContent(lessonId: string, contentId: string, request: UpdateImageRequest): Observable<LessonDetails | null> {
+  const endpoint = `lessons/${lessonId}/contents/${contentId}/image-with-caption`;
+  const formData = new FormData();
+  formData.append('Title', request.title);
+  formData.append('Caption', request.caption);
+  if (request.imageFile) {
+    formData.append('ImageFile', request.imageFile);
+  }
+
+  return this.apiService.put(endpoint, formData).pipe(
+    // Reload the whole lesson to get the potentially new imageUrl
+    switchMap(() => this.loadLessonById(lessonId)),
+    catchError(err => {
+      console.error('Failed to update image content', err);
+      return of(null);
+    })
+  );
 }
 }

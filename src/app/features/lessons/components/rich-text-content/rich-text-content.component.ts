@@ -20,7 +20,7 @@ export class RichTextContentComponent {
   richTextContent = computed(() => {
     const c = this.content();
     if (c.contentType === 'RichText') {
-      return c as RichTextContent;
+      return c ;
     }
     return null;
   });

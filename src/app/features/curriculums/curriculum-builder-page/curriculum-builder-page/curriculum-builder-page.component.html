@@ -40,7 +40,7 @@
       </div>
 
       <div class="space-y-4">
-        @for (chapter of curriculum.chapters; track chapter.id) {
+     @for (chapter of curriculum.chapters; track chapter.id) {
         <app-chapter-accordion-form
           [chapter]="chapter"
           [isExpanded]="expandedChapterId() === chapter.id"
@@ -49,8 +49,10 @@
           (updateTitle)="handleUpdateChapter($event, chapter.id)"
           (addLesson)="handleAddLesson($event, chapter.id, chapter.lessons.length)"
           (deleteLesson)="handleDeleteLesson($event)"
-            (setLessonStatus)="handleSetLessonStatus($event)">
-          </app-chapter-accordion-form>
+          (updateLesson)="handleUpdateLesson($event)"
+          (setLessonStatus)="handleSetLessonStatus($event)">
+        </app-chapter-accordion-form>
+
         <br/>
         } @empty {
         <div

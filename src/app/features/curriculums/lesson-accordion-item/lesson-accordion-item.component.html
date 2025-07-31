@@ -41,7 +41,7 @@
           }"
         >
           <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
-          <span>{{ content.contentType === 'RichText' ? 'Text' : content.contentType }}</span>
+          <span>{{ content.contentType === 'RichText' ? 'Text' : content.title }}</span>
         </button>
       } @empty {
         @if(lessonService.loading()) {

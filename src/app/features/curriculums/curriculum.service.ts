@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { ApiService } from '../../Core/api/api.service';
-import { AddChapterRequest, AddLessonRequest, AddRichTextLessonRequest, CreateCurriculumRequest, CurriculumDetails, CurriculumSummary, UpdateChapterRequest } from '../../Core/api/api-models';
+import { AddChapterRequest, AddLessonRequest, AddRichTextLessonRequest, CreateCurriculumRequest, CurriculumDetails, CurriculumSummary, UpdateChapterRequest, UpdateLessonTitleRequest } from '../../Core/api/api-models';
 import { catchError, finalize, firstValueFrom, of, tap } from 'rxjs';
 
 interface CurriculumState {
@@ -208,5 +208,21 @@ export class CurriculumService {
       )
       .subscribe();
   }
-
+ // =======================================================
+  // ## الدالة الجديدة لتعديل عنوان الدرس ##
+  // =======================================================
+  public updateLessonTitle(curriculumId: string, lessonId: string, request: UpdateLessonTitleRequest): void {
+    // API Endpoint: PUT /api/Lessons/{lessonId}/title
+    this.apiService.put<void>(`lessons/${lessonId}/title`, request).pipe(
+      tap(() => {
+        // أعد تحميل بيانات المنهج بالكامل لضمان تحديث الواجهة بالعنوان الجديد
+        this.loadCurriculumById(curriculumId);
+      }),
+      catchError(err => {
+        console.error('Failed to update lesson title', err);
+        // يمكنك هنا التعامل مع الخطأ، مثلاً عن طريق إظهار رسالة للمستخدم
+        return of(null);
+      })
+    ).subscribe();
+  }
 }

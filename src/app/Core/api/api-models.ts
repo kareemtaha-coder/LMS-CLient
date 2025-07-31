@@ -24,6 +24,13 @@ export interface ValidationError {
   };
 }
 
+/**
+ * Represents the request body for updating a lesson's title.
+ * As per `PUT /api/Lessons/{lessonId}/title`.
+ */
+export interface UpdateLessonTitleRequest {
+  title: string;
+}
 // =================================================================
 // #region Curriculums
 // =================================================================
@@ -128,9 +135,6 @@ export type ContentType =
   | 'Video'
   | 'ImageWithCaption'
   | 'ExamplesGrid';
-export interface ContentTitle {
-  value: string;
-}
 
 /**
  * Represents a summary of a lesson within a chapter.
@@ -159,7 +163,7 @@ export interface LessonDetails {
 interface LessonContentBase {
   id: string;
   sortOrder: number;
-  title: ContentTitle;
+  title: string;
 }
 
 export interface RichTextContent extends LessonContentBase {
@@ -193,11 +197,6 @@ export interface ExamplesGridContent extends LessonContentBase {
   exampleItems: ExampleItem[];
 }
 
-export interface ExampleItem {
-  id: string; // guid
-  imageUrl: string;
-  audioUrl: string;
-}
 
 /** A union of all possible lesson content types. */
 export type LessonContent =
@@ -254,20 +253,79 @@ export interface AddExamplesGridRequest {
   title: string;
   sortOrder: number;
 }
-export interface ExampleItem {
-  id: string;
-  imageUrl: string;
-  audioUrl: string;
-}
 export interface ExamplesGridContent extends LessonContentBase {
   contentType: 'ExamplesGrid';
   examples: ExampleItem[];
 }
+// Core/api/api-models.ts
 
 
+/**
+ * Represents the request body for adding an empty examples grid.
+ * [cite_start]As per `POST /api/lessons/{lessonId}/contents/examples-grid`. [cite: 212, 213]
+ */
+export interface AddExamplesGridRequest {
+  sortOrder: number;
+}
+
+/**
+ * Represents the structure of a single item within an examples grid.
+ * [cite_start]As per response from `GET /api/Lessons/{lessonId}`. [cite: 160, 161]
+ */
+export interface ExampleItem {
+  id: string; // guid
+  imageUrl: string;
+  audioUrl: string | null;
+}
+
+/**
+ * Represents the structure of the ExamplesGrid content block.
+ */
+export interface ExamplesGridContent extends LessonContentBase {
+  contentType: 'ExamplesGrid';
+  exampleItems: ExampleItem[];
+}
+
+/**
+ * Represents the form data for adding a new item to an examples grid.
+ * This is a multipart/form-data request.
+ * [cite_start]As per `POST /api/contents/{contentId}/example-items`. [cite: 259, 260, 263]
+ */
 export interface AddExampleItemRequest {
   imageFile: File;
-  audioFile: File;
+  audioFile?: File;
+}
+
+
+/**
+ * Represents the request body for updating a rich text content block.
+ * As per `PUT /api/lessons/{lessonId}/contents/{contentId}/rich-text`.
+ */
+export interface UpdateRichTextRequest {
+  title: string;
+  arabicText: string;
+  englishText: string;
+  noteType: NoteType;
+}
+
+/**
+ * Represents the request body for updating a video content block.
+ * As per `PUT /api/lessons/{lessonId}/contents/{contentId}/video`.
+ */
+export interface UpdateVideoRequest {
+  title: string;
+  videoUrl: string;
+}
+
+/**
+ * Represents the request body for updating an image-with-caption content block.
+ * Mirrors the ImageFormSaveRequest but is specific to updates.
+ * As per `PUT /api/lessons/{lessonId}/contents/{contentId}/image-with-caption`.
+ */
+export interface UpdateImageRequest {
+  title: string;
+  caption: string;
+  imageFile?: File | null; // The image file is optional during an update
 }
 
 export interface ImageFormSaveRequest {

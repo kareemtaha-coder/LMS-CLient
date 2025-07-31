@@ -17,6 +17,6 @@ export class VideoContentComponent {
 
   videoContent = computed(() => {
     const c = this.content();
-    return c.contentType === 'Video' ? (c as VideoContent) : null;
+    return c.contentType === 'Video' ? (c ) : null;
   });
 }

@@ -40,4 +40,19 @@
       </div>
     </div>
   </div>
+
+  @if(editMode) {
+    <div class="pt-6 mt-6 border-t border-slate-200 dark:border-slate-600">
+      @if (isAdding()) {
+        <app-add-example-item-form (save)="onSaveItem($event)" (cancel)="isAdding.set(false)" />
+      } @else {
+        <div class="text-center">
+          <button (click)="isAdding.set(true)"
+                  class="px-6 py-3 font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-transform hover:scale-105">
+            إضافة مثال جديد للشبكة
+          </button>
+        </div>
+      }
+    </div>
+  }
 }
