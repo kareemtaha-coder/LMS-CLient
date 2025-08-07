@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-add-rich-text-form',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './add-rich-text-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,34 +2,34 @@ import { ChangeDetectionStrategy, Component, model, signal } from '@angular/core
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
-// يبقى كما هو، فهو يحدد أنواع الأيقونات المسموح بها
 export type IconName = 'edit' | 'book-open' | 'reports' | 'settings';
 
 interface NavLink {
   path: string;
   label: string;
   iconName: IconName;
+  badge?: number;
 }
+
 interface NavGroup {
   title: string;
   links: NavLink[];
 }
+
 @Component({
   selector: 'app-sidebar',
-  standalone: true, // من الأفضل استخدام المكونات المستقلة (Standalone) في Angular الحديث
+  standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css'], // سنترك هذا فارغًا لأننا سنضع الكلاسات في HTML
+  styleUrls: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
-  // استخدام model signal ممتاز للـ two-way binding
   isCollapsed = model(false);
 
-  // قائمة الروابط تبقى كما هي
   navGroups = signal<NavGroup[]>([
     {
-      title: 'تصفح',
+      title: 'التصفح والاستكشاف',
       links: [
         {
           path: '/curriculums',
@@ -44,9 +44,9 @@ export class SidebarComponent {
         {
           path: '/manage/curriculums',
           label: 'إدارة المناهج',
-          iconName: 'edit'
+          iconName: 'edit',
+          badge: 3
         }
-        // مستقبلاً، يمكنك إضافة روابط إدارة المستخدمين أو الإعدادات هنا
       ]
     }
   ]);

@@ -366,3 +366,12 @@ export interface UpdateVideoRequest {
   videoUrl: string;
   title: string; // The form will send a simple string
 }
+
+
+/**
+ * Represents the request body for reordering lessons within a chapter.
+ * As per PUT /api/chapters/{chapterId}/lessons/reorder
+ */
+export interface ReorderLessonsRequest {
+  orderedLessonIds: string[];
+}

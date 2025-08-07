@@ -1,53 +1,152 @@
-<div>
+<!-- Lesson Accordion Item Component HTML -->
+<div class="group">
   <button
-    (click)="navigateToLesson()"
-    class="w-full text-right flex items-center gap-3 py-2 px-3 rounded-md transition-colors duration-200 relative"
+    (click)="toggleContent()"
+    class="w-full text-right flex items-center gap-3 p-3 rounded-lg transition-all duration-200 relative hover:translate-x-1"
     [ngClass]="{
-      'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-semibold': isActive(),
-      'text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700/50': !isActive()
+      'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm border-r-2 border-indigo-600': isActive(),
+      'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800': !isActive()
     }"
-  >
-    @if(isActive()) {
-      <span class="absolute left-0 top-2 bottom-2 w-1 bg-blue-600 rounded-r-full"></span>
-    }
+    [attr.aria-label]="'الدرس ' + (chapterIndex() + 1) + '.' + (lessonIndex() + 1) + ': ' + lesson().title"
+    [attr.aria-current]="isActive() ? 'page' : null">
 
-    <div class="flex-shrink-0">
-      @if (isActive()) {
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-        </svg>
-      } @else {
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-        </svg>
-      }
+    <!-- Lesson Number Badge -->
+    <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+         [ngClass]="{
+           'bg-indigo-600 text-white shadow-sm': isActive(),
+           'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-600': !isActive()
+         }">
+      <span class="font-bold text-xs">{{ lessonIndex() + 1 }}</span>
     </div>
 
-    <span class="text-sm">
-      {{ chapterIndex() + 1 }}.{{ lessonIndex() + 1 }} - {{ lesson().title }}
-    </span>
+    <!-- Lesson Content -->
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <!-- Lesson Icon -->
+        <div class="flex-shrink-0 w-4 h-4">
+          @if (isActive()) {
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0-1.125.504-1.125 1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+          }
+        </div>
+
+        <!-- Lesson Title -->
+        <span class="font-medium text-sm truncate"
+              [ngClass]="{
+                'text-indigo-700 dark:text-indigo-300': isActive(),
+                'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white': !isActive()
+              }">
+          {{ lesson().title }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Collapse/Expand Indicator -->
+    <div class="flex-shrink-0 w-4 h-4 transition-transform duration-200"
+         [class.rotate-180]="isActive() && showContents()">
+      @if (isActive()) {
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      } @else {
+        <div class="w-2 h-2 bg-slate-400 rounded-full"></div>
+      }
+    </div>
   </button>
 
-  @if (isActive()) {
-    <div class="mt-2 pl-8 pr-2 pb-1 space-y-1">
-      @for (content of lessonService.lesson()?.contents; track content.id) {
-        <button
-          type="button"
-          (click)="onContentSelect(content)"
-          class="w-full text-right flex items-center gap-3 py-1.5 px-3 rounded-md transition-colors text-sm"
-          [ngClass]="{
-            'bg-slate-200 dark:bg-slate-700 font-semibold text-slate-800 dark:text-slate-100': lessonService.selectedContent()?.id === content.id,
-            'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50': lessonService.selectedContent()?.id !== content.id
-          }"
-        >
-          <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
-          <span>{{ content.contentType === 'RichText' ? 'Text' : content.title }}</span>
-        </button>
-      } @empty {
-        @if(lessonService.loading()) {
-          <p class="px-3 py-2 text-slate-500 text-sm">Loading...</p>
-        }
-      }
+  <!-- Lesson Contents (Sub-items) -->
+  @if (isActive() && showContents()) {
+    <div class="mt-2 mr-8 transition-all duration-300 ease-in-out">
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <!-- Content Header -->
+        <div class="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-600 dark:text-slate-400">محتويات الدرس</span>
+            <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full font-medium">
+              {{ lessonService.lesson()?.contents?.length || 0 }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Scrollable Content Area -->
+        <div class="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+          <div class="p-3 space-y-1">
+          @for (content of lessonService.lesson()?.contents; track content.id) {
+            <button
+              type="button"
+              (click)="onContentSelect(content)"
+              class="w-full text-right flex items-center gap-3 py-2 px-3 rounded-md transition-all duration-200 group/content hover:translate-x-1"
+              [ngClass]="{
+                'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white border border-slate-200 dark:border-slate-600': lessonService.selectedContent()?.id === content.id,
+                'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white': lessonService.selectedContent()?.id !== content.id
+              }"
+              [attr.aria-label]="'محتوى: ' + (content.contentType === 'RichText' ? 'نص' : content.title)">
+
+              <!-- Content Type Icon -->
+              <div class="flex-shrink-0 w-4 h-4">
+                @switch (content.contentType) {
+                  @case ('RichText') {
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 18H3v-2.25A2.25 2.25 0 0 1 5.25 16.5h.75m10.5 0H21v2.25A2.25 2.25 0 0 1 18.75 21h-.75m-10.5-3v-1.5A2.25 2.25 0 0 1 9.75 14.25h1.5m-1.5 0H3v-2.25A2.25 2.25 0 0 1 5.25 12.5h.75m6.75 4.5v-1.5A2.25 2.25 0 0 1 15.75 14.25h1.5" />
+                    </svg>
+                  }
+                  @case ('Video') {
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                  }
+                  @case ('ImageWithCaption') {
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                  }
+                  @default {
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0-1.125.504-1.125 1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  }
+                }
+              </div>
+
+              <!-- Content Title -->
+              <span class="flex-1 text-xs font-medium truncate">
+                {{ content.contentType === 'RichText' ? 'نص' : content.title }}
+              </span>
+
+              <!-- Selected Indicator -->
+              @if (lessonService.selectedContent()?.id === content.id) {
+                <div class="flex-shrink-0 w-1.5 h-1.5 bg-indigo-600 rounded-full"></div>
+              }
+            </button>
+          } @empty {
+            @if(lessonService.loading()) {
+              <div class="flex items-center justify-center py-4">
+                <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                  <div class="w-4 h-4 border-2 border-slate-300 dark:border-slate-600 border-t-indigo-600 rounded-full animate-spin"></div>
+                  <span class="text-xs font-medium">جاري التحميل...</span>
+                </div>
+              </div>
+            } @else {
+              <div class="flex items-center justify-center py-4">
+                <div class="text-center">
+                  <div class="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-slate-400">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0-1.125.504-1.125 1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">لا يوجد محتوى</p>
+                </div>
+              </div>
+            }
+          }
+          </div>
+        </div>
+      </div>
     </div>
   }
 </div>

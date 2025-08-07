@@ -1,85 +1,197 @@
 <aside
-  class="flex h-full flex-col bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 border-l border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out"
-  [class.w-64]="!isCollapsed()"
-  [class.w-20]="isCollapsed()">
-
-  <div class="flex h-16 items-center border-b border-slate-200 dark:border-slate-800 px-4">
-    <a href="/" class="flex items-center gap-3 w-full overflow-hidden">
-      <div class="flex-shrink-0 bg-indigo-600 rounded-lg h-9 w-9 flex items-center justify-center text-white font-bold text-lg shadow-md transition-transform duration-300 hover:scale-110 hover:rotate-6">
-        <span>م</span>
+  class="flex h-full flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 ease-out shadow-sm"
+  [class]="isCollapsed() ? 'w-18' : 'w-72'"
+  role="navigation"
+  aria-label="الشريط الجانبي الرئيسي"
+>
+  <!-- Header Section -->
+  <div
+    class="flex items-center px-6 py-5 border-b border-slate-100 dark:border-slate-800 min-h-20"
+  >
+    <div class="flex items-center gap-3 w-full">
+      <div
+        class="flex-shrink-0 w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200"
+      >
+        <span class="text-white font-bold text-lg">م</span>
       </div>
       @if (!isCollapsed()) {
-        <span class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">
+      <div class="flex flex-col min-w-0 transition-opacity duration-300">
+        <h1 class="font-bold text-xl text-slate-900 dark:text-white">
           المحراب
-        </span>
+        </h1>
+        <span class="text-sm text-slate-500 dark:text-slate-400"
+          >منصة التعلم</span
+        >
+      </div>
       }
-    </a>
+    </div>
   </div>
 
-<nav class="flex-grow p-2 space-y-1 overflow-y-auto">
-  @for (group of navGroups(); track $index) {
-    @if (!isCollapsed()) {
-      <h3 class="px-3 pt-3 pb-1 text-xs font-semibold uppercase text-slate-500 tracking-wider">
-        {{ group.title }}
-      </h3>
-    }
-
-    @for (link of group.links; track link.path) {
-      <a
-        [routerLink]="link.path"
-        routerLinkActive="active-link"
-        [routerLinkActiveOptions]="{exact: true}"
-        class="group flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-600 dark:text-slate-400 transition-colors duration-200 hover:bg-slate-200/60 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-slate-100"
-        [class.justify-center]="isCollapsed()"
-        [title]="isCollapsed() ? link.label : ''">
-
-        <div class="w-6 h-6 shrink-0">
-          @switch (link.iconName) {
-            @case ('edit') { <svg></svg> }
-            @case ('book-open') { <svg></svg> }
-          }
-        </div>
-        @if (!isCollapsed()) {
-          <span class="font-medium text-sm whitespace-nowrap">
-            {{ link.label }}
-          </span>
-        }
-      </a>
-    }
-
-    @if ($index < navGroups().length - 1 && !isCollapsed()) {
-      <div class="py-2">
-        <hr class="border-t border-slate-200 dark:border-slate-800 mx-3">
-      </div>
-    }
-  }
-</nav>
-
-  <div class="p-2 border-t border-slate-200 dark:border-slate-800">
-    <div class="flex items-center gap-3 p-2 rounded-md transition-colors hover:bg-slate-200/60 dark:hover:bg-slate-800/80 cursor-pointer" [class.justify-center]="isCollapsed()">
-      <img class="h-9 w-9 rounded-full object-cover shrink-0" src="https://placehold.co/100x100/6366F1/FFFFFF?text=A" alt="صورة المستخدم" />
+  <!-- Navigation Section -->
+  <nav
+    class="flex-1 px-3 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent"
+    role="menubar"
+  >
+    @for (group of navGroups(); track $index) {
+    <div class="mb-8" role="group" [attr.aria-label]="group.title">
       @if (!isCollapsed()) {
-        <div class="flex-grow overflow-hidden">
-          <p class="font-semibold text-sm text-slate-800 dark:text-slate-100 truncate">أيمن المحمدي</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400 truncate">معلم</p>
-        </div>
+      <div class="mb-4">
+        <h2
+          class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 mb-3"
+        >
+          {{ group.title }}
+        </h2>
+        <div
+          class="h-px bg-gradient-to-r from-slate-200 to-transparent dark:from-slate-700 mx-3"
+        ></div>
+      </div>
+      }
+
+      <ul class="space-y-1" role="menu">
+        @for (link of group.links; track link.path) {
+        <li role="none">
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm border-r-2 border-indigo-600"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="relative flex items-center gap-3 px-3 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all duration-200 group hover:translate-x-1"
+            [class]="isCollapsed() ? 'justify-center px-2' : ''"
+            role="menuitem"
+            [attr.aria-label]="link.label"
+            [title]="isCollapsed() ? link.label : ''"
+          >
+            <div class="w-5 h-5 flex-shrink-0">
+              @switch (link.iconName) { @case ('edit') {
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                />
+              </svg>
+              } @case ('book-open') {
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25A8.966 8.966 0 0 1 18 3.75c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
+                />
+              </svg>
+              } }
+            </div>
+
+            @if (!isCollapsed()) {
+            <span class="font-medium text-sm flex-1">{{ link.label }}</span>
+            @if (link.badge) {
+            <span
+              class="bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded-full font-medium"
+              >{{ link.badge }}</span
+            >
+            } }
+          </a>
+        </li>
+        }
+      </ul>
+    </div>
+    }
+  </nav>
+
+  <!-- Footer Section -->
+  <div class="p-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+    <!-- User Profile -->
+    <div
+      class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200"
+      [class]="isCollapsed() ? 'justify-center p-2' : ''"
+    >
+      <div class="relative flex-shrink-0">
+        <img
+          src="https://placehold.co/100x100/6366F1/FFFFFF?text=A"
+          alt="صورة المستخدم"
+          class="w-10 h-10 rounded-full object-cover"
+        />
+        <div
+          class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"
+        ></div>
+      </div>
+
+      @if (!isCollapsed()) {
+      <div class="flex-1 min-w-0">
+        <p
+          class="font-semibold text-sm text-slate-900 dark:text-white truncate"
+        >
+          أحمد عبدالعزيز
+        </p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">مدير</p>
+      </div>
+
+      <button
+        class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md transition-colors duration-200"
+        aria-label="قائمة المستخدم"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-4 h-4"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
+          />
+        </svg>
+      </button>
       }
     </div>
 
+    <!-- Collapse Toggle -->
     <button
       (click)="isCollapsed.set(!isCollapsed())"
-      title="{{ isCollapsed() ? 'توسيع الشريط' : 'طي الشريط' }}"
-      class="w-full group mt-1 flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-600 dark:text-slate-400 transition-colors duration-200 hover:bg-slate-200/60 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-slate-100"
-      [class.justify-center]="isCollapsed()">
-
-      <div class="w-6 h-6 shrink-0 transition-transform duration-300" [class.rotate-180]="!isCollapsed()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15 10a.75.75 0 01-.75.75H7.612l2.158 1.96a.75.75 0 11-1.04 1.08l-3.5-3.25a.75.75 0 010-1.08l3.5-3.25a.75.75 0 111.04 1.08L7.612 9.25H14.25A.75.75 0 0115 10z" clip-rule="evenodd" /></svg>
+      class="flex items-center gap-3 w-full px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-200"
+      [class]="isCollapsed() ? 'justify-center px-2' : ''"
+      [attr.aria-label]="
+        isCollapsed() ? 'توسيع الشريط الجانبي' : 'طي الشريط الجانبي'
+      "
+      [title]="isCollapsed() ? 'توسيع الشريط' : 'طي الشريط'"
+    >
+      <div
+        class="w-5 h-5 transition-transform duration-300"
+        [class]="!isCollapsed() ? 'rotate-180' : ''"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-5 h-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 19.5 8.25 12l7.5-7.5"
+          />
+        </svg>
       </div>
 
       @if (!isCollapsed()) {
-        <span class="font-medium text-sm whitespace-nowrap">
-          طي الشريط
-        </span>
+      <span class="font-medium text-sm">طي الشريط</span>
       }
     </button>
   </div>

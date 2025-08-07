@@ -36,7 +36,6 @@ import { ExamplesGridContentComponent } from "../components/examples-grid-conten
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     DragDropModule,
     AddRichTextFormComponent,
     RichTextContentComponent,
@@ -46,8 +45,8 @@ import { ExamplesGridContentComponent } from "../components/examples-grid-conten
     ImageWithCaptionContentComponent,
     AddExamplesGridFormComponent,
     ExamplesGridContentComponent
-],
-  templateUrl: './lesson-builder-page.component.html',
+  ],
+  templateUrl:'./lesson-builder-page.component.html' ,
   styleUrls: ['./lesson-builder-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -57,7 +56,7 @@ export class LessonBuilderPageComponent {
 
   // --- State Signals ---
   protected editingContentId = signal<string | null>(null);
-protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesGrid' | null>(null);
+  protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesGrid' | null>(null);
   protected addingAtIndex = signal<number | 'bottom'>('bottom');
   protected collapsedState = signal<Record<string, boolean>>({});
   protected contextualMenuOpenAtIndex = signal<number | null>(null);
@@ -67,6 +66,48 @@ protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesG
       this.lessonService.loadLessonById(this.id()).subscribe();
     });
   }
+
+  // --- UI Helper Methods ---
+  getAvatarClass(content: LessonContent): string {
+    switch (content.contentType) {
+      case 'RichText':
+        return 'bg-gradient-to-br from-blue-400 to-blue-600';
+      case 'Video':
+        return 'bg-gradient-to-br from-red-400 to-red-600';
+      case 'ImageWithCaption':
+        return 'bg-gradient-to-br from-green-400 to-green-600';
+      case 'ExamplesGrid':
+        return 'bg-gradient-to-br from-purple-400 to-purple-600';
+      default:
+        return 'bg-gradient-to-br from-slate-400 to-slate-600';
+    }
+  }
+
+  getContentIcon(content: LessonContent): string {
+    switch (content.contentType) {
+      case 'RichText': return 'T';
+      case 'Video': return '▶';
+      case 'ImageWithCaption': return '📷';
+      case 'ExamplesGrid': return '⊞';
+      default: return '?';
+    }
+  }
+
+  getTypeTag(content: LessonContent): string {
+    switch (content.contentType) {
+      case 'RichText':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'Video':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      case 'ImageWithCaption':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'ExamplesGrid':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+      default:
+        return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
+    }
+  }
+
 
   // --- Data Handlers for Forms ---
 

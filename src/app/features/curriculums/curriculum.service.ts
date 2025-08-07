@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { ApiService } from '../../Core/api/api.service';
-import { AddChapterRequest, AddLessonRequest, AddRichTextLessonRequest, CreateCurriculumRequest, CurriculumDetails, CurriculumSummary, UpdateChapterRequest, UpdateLessonTitleRequest } from '../../Core/api/api-models';
+import { AddChapterRequest, AddLessonRequest, AddRichTextLessonRequest, CreateCurriculumRequest, CurriculumDetails, CurriculumSummary, LessonSummary, ReorderLessonsRequest, UpdateChapterRequest, UpdateLessonTitleRequest } from '../../Core/api/api-models';
 import { catchError, finalize, firstValueFrom, of, tap } from 'rxjs';
 
 interface CurriculumState {
@@ -225,4 +225,54 @@ export class CurriculumService {
       })
     ).subscribe();
   }
+
+
+
+
+  /**
+   * Reorders lessons within a specific chapter.
+   * Performs an optimistic update on the local state for a smooth UX.
+   * @param curriculumId The ID of the parent curriculum (for potential state rollback on error).
+   * @param chapterId The ID of the chapter whose lessons are being reordered.
+   * @param request The request object containing the new order of lesson IDs.
+   */
+  public reorderLessons(curriculumId: string, chapterId: string, request: ReorderLessonsRequest): void {
+    // Note: The user-provided API endpoint was /api/Lessons/... but the standard RESTful
+    // convention is /api/chapters/... which is used here for consistency.
+    const endpoint = `Lessons/${chapterId}/lessons/reorder`;
+
+    // --- Optimistic Update ---
+    // Update the state immediately, assuming the API call will succeed.
+    const originalState = this.#state().selectedCurriculum;
+    const curriculum = this.#state().selectedCurriculum;
+    if (curriculum) {
+        const updatedChapters = curriculum.chapters.map(chapter => {
+            if (chapter.id === chapterId) {
+                // Create a new sorted array of lessons based on the ordered IDs
+                const reorderedLessons = request.orderedLessonIds
+                    .map(id => chapter.lessons.find(lesson => lesson.id === id))
+                    .filter((l): l is LessonSummary => !!l); // Filter out any potential undefined values
+                return { ...chapter, lessons: reorderedLessons };
+            }
+            return chapter;
+        });
+        this.#state.update(s => ({
+            ...s,
+            selectedCurriculum: { ...curriculum, chapters: updatedChapters }
+        }));
+    }
+    // --- End Optimistic Update ---
+
+    this.apiService.put<void>(endpoint, request).pipe(
+      catchError(err => {
+        console.error('Failed to reorder lessons', err);
+        // If the API call fails, revert the state to its original form
+        if(originalState) {
+            this.#state.update(s => ({...s, selectedCurriculum: originalState}));
+        }
+        return of(null);
+      })
+    ).subscribe();
+  }
+
 }

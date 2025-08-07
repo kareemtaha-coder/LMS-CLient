@@ -9,3 +9,28 @@
     @apply bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 font-semibold;
   }
 }
+
+
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-slate-300 {
+  scrollbar-color: rgb(203 213 225) transparent;
+}
+
+.dark .scrollbar-thumb-slate-600 {
+  scrollbar-color: rgb(71 85 105) transparent;
+}
+
+.scrollbar-track-transparent {
+  scrollbar-color: transparent transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+

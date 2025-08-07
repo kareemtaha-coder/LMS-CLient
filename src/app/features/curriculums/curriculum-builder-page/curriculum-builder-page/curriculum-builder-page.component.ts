@@ -2,17 +2,18 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, si
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurriculumService } from '../../curriculum.service';
-import { AddChapterRequest, AddLessonRequest, ChapterWithLessons, UpdateChapterRequest, UpdateLessonTitleRequest } from '../../../../Core/api/api-models';
+import { AddChapterRequest, AddLessonRequest, ChapterWithLessons, LessonSummary, ReorderLessonsRequest, UpdateChapterRequest, UpdateLessonTitleRequest } from '../../../../Core/api/api-models';
 import { AddChapterFormComponent } from '../../add-chapter-form/add-chapter-form.component';
 import { InlineEditComponent } from "../../../../shared/ui/inline-edit/inline-edit.component";
 import { ConfirmationDialogComponent } from "../../../../shared/ui/confirmation-dialog/confirmation-dialog.component";
 import { AddLessonFormComponent } from "../../../lessons/add-lesson-form/add-lesson-form.component";
 import { ChapterAccordionComponent } from "../../chapter-accordion/chapter-accordion.component";
 import { ChapterAccordionFormComponent } from "../../chapter-accordion-form/chapter-accordion-form.component";
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-curriculum-builder-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, AddChapterFormComponent, InlineEditComponent, ConfirmationDialogComponent, AddLessonFormComponent, ChapterAccordionComponent, ChapterAccordionFormComponent],
+  imports: [CommonModule, RouterLink, AddChapterFormComponent, ConfirmationDialogComponent, ChapterAccordionFormComponent],
     templateUrl: './curriculum-builder-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -134,5 +135,23 @@ export class CurriculumBuilderPageComponent {
   handleUpdateLesson(event: { lessonId: string, newTitle: string }): void {
     const request: UpdateLessonTitleRequest = { title: event.newTitle };
     this.curriculumService.updateLessonTitle(this.id(), event.lessonId, request);
+  }
+
+
+  handleReorderLessons(event: CdkDragDrop<LessonSummary[]>, chapterId: string): void {
+    // Prevent API call if the item was dropped in the same place
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    // Create a new array with the reordered items to determine the new ID order
+    const reorderedLessons = [...event.container.data];
+    moveItemInArray(reorderedLessons, event.previousIndex, event.currentIndex);
+
+    const orderedLessonIds = reorderedLessons.map(lesson => lesson.id);
+    const request: ReorderLessonsRequest = { orderedLessonIds };
+
+    // Call the service to update the backend and optimistically update the UI
+    this.curriculumService.reorderLessons(this.id(), chapterId, request);
   }
 }

@@ -1,0 +1,44 @@
+/* Custom styles for rich text editors */
+.rich-text-container {
+  @apply rounded-lg border-2 overflow-hidden transition-colors duration-200;
+}
+
+.arabic-editor ::ng-deep .angular-editor-wrapper {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-editor ::ng-deep .angular-editor-textarea {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+.english-editor ::ng-deep .angular-editor-wrapper {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Dark mode support for editor */
+.dark .rich-text-container ::ng-deep .angular-editor-wrapper {
+  background-color: rgb(15 23 42);
+  border-color: rgb(51 65 85);
+}
+
+.dark .rich-text-container ::ng-deep .angular-editor-toolbar {
+  background-color: rgb(30 41 59);
+  border-bottom-color: rgb(51 65 85);
+}
+
+.dark .rich-text-container ::ng-deep .angular-editor-textarea {
+  background-color: rgb(15 23 42);
+  color: rgb(248 250 252);
+}
+
+.dark .rich-text-container ::ng-deep .angular-editor-toolbar button {
+  color: rgb(203 213 225);
+}
+
+.dark .rich-text-container ::ng-deep .angular-editor-toolbar button:hover {
+  background-color: rgb(51 65 85);
+}

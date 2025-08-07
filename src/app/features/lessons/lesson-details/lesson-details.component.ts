@@ -2,18 +2,19 @@ import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angu
 import { RouterLink } from '@angular/router';
 import { LessonService } from '../lesson.service';
 
-// Import all the new content components
+// Import all the content components
 import { RichTextContentComponent } from '../components/rich-text-content/rich-text-content.component';
 import { VideoContentComponent } from '../components/video-content/video-content.component';
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
 import { ExamplesGridContentComponent } from '../components/examples-grid-content/examples-grid-content.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-lesson-details',
   standalone: true,
-  // Add all components to the imports array
   imports: [
     RouterLink,
+    CommonModule,
     RichTextContentComponent,
     VideoContentComponent,
     ImageWithCaptionContentComponent,

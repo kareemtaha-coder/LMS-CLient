@@ -50,6 +50,7 @@
           (addLesson)="handleAddLesson($event, chapter.id, chapter.lessons.length)"
           (deleteLesson)="handleDeleteLesson($event)"
           (updateLesson)="handleUpdateLesson($event)"
+          (reorderLessons)="handleReorderLessons($event, chapter.id)"
           (setLessonStatus)="handleSetLessonStatus($event)">
         </app-chapter-accordion-form>
 

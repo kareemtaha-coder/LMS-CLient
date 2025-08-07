@@ -28,7 +28,7 @@
   --color-accent-yellow: #FBBF24;
   --color-accent-green: #34D399;
   --color-accent-red: #F87171;
-},
+}
 /* تطبيق الخط والخلفية على مستوى المشروع */
 html, body {
   font-family: 'Tajawal', sans-serif;
