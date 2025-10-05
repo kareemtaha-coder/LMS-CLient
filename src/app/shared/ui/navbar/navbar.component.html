@@ -1,26 +1,22 @@
-<header class="sticky top-0 left-0 w-full bg-transparent shadow-sm z-50 text-text">
+﻿<header class="sticky top-0 left-0 w-full bg-transparent shadow-sm z-50 text-text">
   <div class="container mx-auto px-6 py-4">
-    <nav class="flex justify-between items-center">
-      <!-- Logo and brand name -->
-      <div class="flex items-center">
-        <h1 class="text-2xl font-bold text-primary">AL-Mehrab</h1>
+    <nav class="flex justify-between items-center gap-4">
+      <a routerLink="/curriculums" class="flex items-center gap-2 font-semibold text-primary text-lg">
+        <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/15 text-primary">AL</span>
+        <span>AL-Mehrab</span>
+      </a>
+
+      <div class="flex-1 hidden md:flex items-center justify-center gap-6 text-sm text-muted">
+        <!-- space for navigation links -->
       </div>
 
-      <!-- Middle nav items - can be added later if needed -->
-      <div class="hidden md:flex items-center space-x-6">
-        <!-- Add navigation links here if needed -->
-      </div>
-
-      <!-- Right side actions -->
-      <div class="flex items-center space-x-4">
-        <!-- Theme toggle button with improved styling -->
+      <div class="flex items-center gap-3">
         <button
           id="theme-toggle"
           (click)="toggleTheme()"
           class="p-2.5 rounded-full bg-primary/10 hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300"
           aria-label="Toggle dark mode"
         >
-          <!-- Sun icon for dark mode -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-primary hidden dark:block transition-transform duration-300 hover:rotate-45"
@@ -35,7 +31,6 @@
               d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
             />
           </svg>
-          <!-- Moon icon for light mode -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-primary block dark:hidden transition-transform duration-300 hover:rotate-12"
@@ -52,22 +47,28 @@
           </svg>
         </button>
 
-        <!-- Menu button for mobile - appears on small screens -->
-        <button
-          class="md:hidden p-2 rounded-full bg-primary/10 hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300"
-          aria-label="Open menu"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-primary"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        @if (user(); as currentUser) {
+          <div class="hidden sm:flex flex-col text-right text-xs leading-snug">
+            <span class="text-muted uppercase tracking-wide">مسجل كـ</span>
+            <span class="font-semibold text-text">{{ currentUser.email }}</span>
+          </div>
+          <button
+            type="button"
+            (click)="logout()"
+            class="px-3 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:opacity-90 transition"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+            تسجيل الخروج
+          </button>
+        } @else {
+          <a
+            routerLink="/login"
+            class="px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 transition"
+          >
+            تسجيل الدخول
+          </a>
+        }
       </div>
     </nav>
   </div>
 </header>
+

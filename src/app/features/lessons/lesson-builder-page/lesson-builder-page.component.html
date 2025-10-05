@@ -25,6 +25,12 @@
               >
                 Collapse All
               </button>
+              <button
+                (click)="toggleCompact()"
+                class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+              >
+                {{ compactMode() ? 'Normal View' : 'Compact View' }}
+              </button>
             </div>
           </div>
         </div>
@@ -42,9 +48,9 @@
           >
             @for (content of lesson.contents; track content.id; let i = $index) {
               <!-- Content Message Bubble -->
-              <div class="flex items-start gap-3 group animate-in slide-in-from-bottom-4 duration-300">
+              <div class="flex items-start group animate-in slide-in-from-bottom-4 duration-300" [ngClass]="{ 'gap-2': compactMode(), 'gap-3': !compactMode() }">
                 <!-- Avatar -->
-                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg"
+                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg" [class.hidden]="compactMode()"
                      [ngClass]="getAvatarClass(content)">
                   {{ getContentIcon(content) }}
                 </div>
@@ -180,7 +186,7 @@
 
                     <!-- Content Display -->
                     @if (editingContentId() === content.id) {
-                      <div class="p-6">
+                      <div [ngClass]="{ 'p-3': compactMode(), 'p-6': !compactMode() }">
                         @switch (content.contentType) {
                           @case('RichText') {
                             <app-add-rich-text-form
@@ -214,7 +220,7 @@
                         }
                       </div>
                     } @else if (!isCollapsed(content.id)) {
-                      <div class="p-6">
+                      <div [ngClass]="{ 'p-3': compactMode(), 'p-6': !compactMode() }">
                         <!-- Content Title -->
                         <div class="mb-4">
                           <h3 class="font-semibold text-slate-800 dark:text-slate-100 text-lg">

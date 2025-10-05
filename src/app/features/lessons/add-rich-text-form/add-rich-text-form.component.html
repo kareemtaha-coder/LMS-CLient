@@ -10,9 +10,9 @@
           <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
         </svg>
       </span>
-      {{ initialData ? 'تعديل المحتوى النصي' : 'إضافة محتوى نصي' }}
+      {{ initialData ? 'تحرير نص' : 'إضافة نص' }}
     </h3>
-    <div class="flex items-center gap-2" title="اختر نوع الملاحظة">
+    <div class="flex items-center gap-2" title="نوع الملاحظة">
       @for(note of noteTypes; track note.type) {
         <button
           type="button"
@@ -47,7 +47,7 @@
     />
     <label for="title" class="absolute text-sm duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-slate-800 px-2 right-1 peer-focus:px-2 peer-focus:text-blue-600 dark:peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
     [ngClass]="{'text-slate-500 dark:text-slate-400': !isInvalid('title'), 'text-red-600 dark:text-red-500': isInvalid('title')}"
-    >عنوان المحتوى</label>
+    >العنوان</label>
     @if (isInvalid('title')) {
       <p class="mt-1 text-xs text-red-600 dark:text-red-500">العنوان مطلوب.</p>
     }
@@ -56,33 +56,19 @@
   <div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <textarea
-          formControlName="arabicText"
-          rows="5"
-          placeholder="النص بالعربية..."
-          class="w-full rounded-md bg-slate-50 dark:bg-slate-900/50 focus:ring-blue-500 focus:border-blue-500 transition"
-          [ngClass]="{
-            'border-slate-300 dark:border-slate-600': !isInvalid('arabicText'),
-            'border-red-500 dark:border-red-500 ring-red-500 focus:ring-red-500 focus:border-red-500': isInvalid('arabicText')
-          }"
-        ></textarea>
+        <div class="quill-container">
+          <div #arabicEditor class="min-h-[160px]"></div>
+        </div>
         @if (isInvalid('arabicText')) {
           <p class="mt-1 text-xs text-red-600 dark:text-red-500">النص العربي مطلوب.</p>
         }
       </div>
       <div>
-        <textarea
-          formControlName="englishText"
-          rows="5"
-          placeholder="Text in English..."
-          class="w-full rounded-md bg-slate-50 dark:bg-slate-900/50 focus:ring-blue-500 focus:border-blue-500 transition"
-          [ngClass]="{
-            'border-slate-300 dark:border-slate-600': !isInvalid('englishText'),
-            'border-red-500 dark:border-red-500 ring-red-500 focus:ring-red-500 focus:border-red-500': isInvalid('englishText')
-          }"
-        ></textarea>
+        <div class="quill-container">
+          <div #englishEditor class="min-h-[160px]"></div>
+        </div>
         @if (isInvalid('englishText')) {
-          <p class="mt-1 text-xs text-red-600 dark:text-red-500">النص الإنجليزي مطلوب.</p>
+          <p class="mt-1 text-xs text-red-600 dark:text-red-500">English text is required.</p>
         }
       </div>
     </div>
@@ -101,7 +87,8 @@
       [disabled]="form.invalid"
       class="px-6 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-slate-400 disabled:cursor-not-allowed disabled:shadow-none shadow-md hover:shadow-lg transition-all"
     >
-      حفظ المحتوى
+      حفظ
     </button>
   </div>
 </form>
+

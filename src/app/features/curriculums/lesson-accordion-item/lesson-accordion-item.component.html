@@ -1,13 +1,13 @@
-<!-- Lesson Accordion Item Component HTML -->
+﻿<!-- Lesson Accordion Item Component HTML -->
 <div class="group">
   <button
     (click)="toggleContent()"
-    class="w-full text-right flex items-center gap-3 p-3 rounded-lg transition-all duration-200 relative hover:translate-x-1"
+    class="lesson-link w-full text-right flex items-center gap-3 p-3 rounded-lg transition-all duration-200 relative hover:translate-x-1"
     [ngClass]="{
       'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm border-r-2 border-indigo-600': isActive(),
       'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800': !isActive()
     }"
-    [attr.aria-label]="'الدرس ' + (chapterIndex() + 1) + '.' + (lessonIndex() + 1) + ': ' + lesson().title"
+    [attr.aria-label]="'ط§ظ„ط¯ط±ط³ ' + (chapterIndex() + 1) + '.' + (lessonIndex() + 1) + ': ' + lesson().title"
     [attr.aria-current]="isActive() ? 'page' : null">
 
     <!-- Lesson Number Badge -->
@@ -23,7 +23,7 @@
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2">
         <!-- Lesson Icon -->
-        <div class="flex-shrink-0 w-4 h-4">
+        <div class="lesson-icon flex-shrink-0 w-4 h-4">
           @if (isActive()) {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
@@ -66,7 +66,7 @@
         <!-- Content Header -->
         <div class="px-3 py-2 bg-slate-100 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-slate-600 dark:text-slate-400">محتويات الدرس</span>
+            <span class="text-xs font-medium text-slate-600 dark:text-slate-400">ظ…ط­طھظˆظٹط§طھ ط§ظ„ط¯ط±ط³</span>
             <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full font-medium">
               {{ lessonService.lesson()?.contents?.length || 0 }}
             </span>
@@ -80,15 +80,15 @@
             <button
               type="button"
               (click)="onContentSelect(content)"
-              class="w-full text-right flex items-center gap-3 py-2 px-3 rounded-md transition-all duration-200 group/content hover:translate-x-1"
+              class="lesson-link w-full text-right flex items-center gap-3 py-2 px-3 rounded-md transition-all duration-200 group/content hover:translate-x-1"
               [ngClass]="{
                 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white border border-slate-200 dark:border-slate-600': lessonService.selectedContent()?.id === content.id,
                 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white': lessonService.selectedContent()?.id !== content.id
               }"
-              [attr.aria-label]="'محتوى: ' + (content.contentType === 'RichText' ? 'نص' : content.title)">
+              [attr.aria-label]="'ظ…ظƒظˆظ† ط§ظ„ط¯ط±ط³: ' + (content.title || content.contentType)">
 
               <!-- Content Type Icon -->
-              <div class="flex-shrink-0 w-4 h-4">
+              <div class="lesson-icon flex-shrink-0 w-4 h-4">
                 @switch (content.contentType) {
                   @case ('RichText') {
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -115,7 +115,7 @@
 
               <!-- Content Title -->
               <span class="flex-1 text-xs font-medium truncate">
-                {{ content.contentType === 'RichText' ? 'نص' : content.title }}
+                {{ content.title || content.contentType }}
               </span>
 
               <!-- Selected Indicator -->
@@ -128,7 +128,7 @@
               <div class="flex items-center justify-center py-4">
                 <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                   <div class="w-4 h-4 border-2 border-slate-300 dark:border-slate-600 border-t-indigo-600 rounded-full animate-spin"></div>
-                  <span class="text-xs font-medium">جاري التحميل...</span>
+                  <span class="text-xs font-medium">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</span>
                 </div>
               </div>
             } @else {
@@ -139,7 +139,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0-1.125.504-1.125 1.125V11.25a9 9 0 0 0-9-9Z" />
                     </svg>
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">لا يوجد محتوى</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰</p>
                 </div>
               </div>
             }
@@ -150,3 +150,4 @@
     </div>
   }
 </div>
+

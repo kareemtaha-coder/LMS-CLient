@@ -60,11 +60,18 @@ export class LessonBuilderPageComponent {
   protected addingAtIndex = signal<number | 'bottom'>('bottom');
   protected collapsedState = signal<Record<string, boolean>>({});
   protected contextualMenuOpenAtIndex = signal<number | null>(null);
+  protected compactMode = signal(false);
 
   constructor() {
     effect(() => {
       this.lessonService.loadLessonById(this.id()).subscribe();
     });
+  }
+
+  toggleCompact(): void {
+    const next = !this.compactMode();
+    this.compactMode.set(next);
+    if (next) this.collapseAll(); else this.expandAll();
   }
 
   // --- UI Helper Methods ---

@@ -5,6 +5,7 @@ import { NgClass } from '@angular/common'; // Import NgClass for styling
 
 @Component({
   selector: 'app-curriculum-details',
+  standalone: true,
   imports: [RouterLink, NgClass], // Removed ChapterAccordionComponent, added NgClass
   templateUrl: './curriculum-details.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

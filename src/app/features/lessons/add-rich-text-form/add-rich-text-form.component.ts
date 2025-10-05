@@ -1,7 +1,19 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  OnInit,
+  Output,
+  Input,
+  ViewChild,
+  AfterViewInit,
+  inject,
+} from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AddRichTextRequest, NoteType, RichTextContent } from '../../../Core/api/api-models';
 import { CommonModule } from '@angular/common';
+declare const Quill: any;
 
 @Component({
   selector: 'app-add-rich-text-form',
@@ -9,7 +21,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './add-rich-text-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddRichTextFormComponent implements OnInit {
+export class AddRichTextFormComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
 
   // NEW: Input to pre-fill the form in "edit" mode
@@ -33,12 +45,64 @@ export class AddRichTextFormComponent implements OnInit {
     noteType: this.fb.control<NoteType>(0, Validators.required),
   });
 
+  @ViewChild('arabicEditor', { static: false }) arabicEditorRef?: ElementRef;
+  @ViewChild('englishEditor', { static: false }) englishEditorRef?: ElementRef;
+  private arabicQuill?: any;
+  private englishQuill?: any;
+
   ngOnInit(): void {
     // NEW: If initial data is provided, patch the form
     if (this.initialData) {
       this.form.patchValue({
         ...this.initialData,
         title: String(this.initialData.title),
+      });
+    }
+  }
+
+  ngAfterViewInit(): void {
+    const modules = {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{ header: [2, 3, false] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link'],
+      ],
+      clipboard: { matchVisual: false },
+    };
+
+    if (this.arabicEditorRef) {
+      this.arabicQuill = new Quill(this.arabicEditorRef.nativeElement, {
+        theme: 'snow',
+        modules,
+        placeholder: 'اكتب النص العربي...'
+      });
+      const initialHtml = this.form.controls.arabicText.value ?? '';
+      if (initialHtml) {
+        this.arabicQuill.clipboard.dangerouslyPasteHTML(initialHtml);
+      }
+      this.arabicQuill.on('text-change', () => {
+        const html = this.normalizeHtml(this.arabicQuill.root.innerHTML);
+        this.form.controls.arabicText.setValue(html);
+      });
+      // RTL styling
+      this.arabicQuill.root.setAttribute('dir', 'rtl');
+      this.arabicQuill.root.style.textAlign = 'right';
+    }
+
+    if (this.englishEditorRef) {
+      this.englishQuill = new Quill(this.englishEditorRef.nativeElement, {
+        theme: 'snow',
+        modules,
+        placeholder: 'Write the English text...'
+      });
+      const englishHtml = this.form.controls.englishText.value ?? '';
+      if (englishHtml) {
+        this.englishQuill.clipboard.dangerouslyPasteHTML(englishHtml);
+      }
+      this.englishQuill.on('text-change', () => {
+        const html = this.normalizeHtml(this.englishQuill.root.innerHTML);
+        this.form.controls.englishText.setValue(html);
       });
     }
   }
@@ -60,5 +124,12 @@ export class AddRichTextFormComponent implements OnInit {
   isInvalid(controlName: keyof typeof this.form.controls): boolean {
     const control = this.form.get(controlName) as FormControl;
     return control.invalid && (control.dirty || control.touched);
+  }
+
+  private normalizeHtml(html: string): string {
+    if (!html || html === '<p><br></p>') {
+      return '';
+    }
+    return html;
   }
 }

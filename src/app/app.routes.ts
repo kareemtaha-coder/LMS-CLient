@@ -1,70 +1,61 @@
-import { ActivatedRouteSnapshot, ResolveFn, Routes } from '@angular/router';
-import { CourseLayoutComponent } from './features/course-layout/course-layout.component';
-import { LessonLayoutComponent } from './features/lessons/lesson-layout/lesson-layout.component';
-import { LessonDetails } from './Core/api/api-models';
-import { LessonService } from './features/lessons/lesson.service';
-import { inject } from '@angular/core';
-const lessonResolver: ResolveFn<LessonDetails | null> = (route: ActivatedRouteSnapshot) => {
-  const lessonService = inject(LessonService);
-  const lessonId = route.paramMap.get('lessonId');
-  if (lessonId) {
-    return lessonService.loadLessonById(lessonId);
-  }
-  return null;
-};
+﻿import { Routes } from '@angular/router';
+import { authGuard } from './Core/auth/auth.guard';
+
 export const routes: Routes = [
-  // ==================================================
-  // #1: المسارات العامة (واجهة الطالب/الزائر)
-  // ==================================================
   {
-    // الصفحة الرئيسية التي تعرض قائمة المناهج المتاحة للتصفح
-    path: 'curriculums',
-    loadComponent: () => import('./features/curriculums/curriculum-list/curriculum-list.component').then(m => m.CurriculumListComponent)
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login-page/login-page.component').then(
+        (m) => m.LoginPageComponent
+      ),
   },
   {
-    // التخطيط الخاص بعرض منهج معين ودروسه
+    path: 'curriculums',
+    loadComponent: () =>
+      import('./features/curriculums/curriculum-list/curriculum-list.component').then(
+        (m) => m.CurriculumListComponent
+      ),
+    canActivate: [authGuard],
+    data: { preload: true, requiresAuth: true },
+  },
+  {
     path: 'course/:id',
-    component: CourseLayoutComponent,
+    loadComponent: () =>
+      import('./features/course-layout/course-layout.component').then(
+        (m) => m.CourseLayoutComponent
+      ),
+    canActivate: [authGuard],
     children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import(
+            './features/curriculums/curriculum-details/curriculum-details.component'
+          ).then((m) => m.CurriculumDetailsComponent),
+        canActivate: [authGuard],
+        data: { preload: true, requiresAuth: true },
+      },
       {
         path: 'lessons/:lessonId',
-        component: LessonLayoutComponent,
-        resolve: { lesson: lessonResolver }
+        loadComponent: () =>
+          import('./features/lessons/lesson-layout/lesson-layout.component').then(
+            (m) => m.LessonLayoutComponent
+          ),
+        canActivate: [authGuard],
+        data: { preload: true, requiresAuth: true },
       },
-      // مستقبلاً، يمكن إضافة توجيه تلقائي لأول درس في المنهج هنا
-    ]
+    ],
   },
-
-  // ==================================================
-  // #2: مسارات الإدارة (واجهة مدير المحتوى)
-  // ==================================================
-    {
+  {
     path: 'manage',
-    children: [
-      {
-        // هذه هي صفحة الإدارة الرئيسية (Hub)
-        // ستحتوي على نموذج الإنشاء وقائمة المناهج معًا
-        path: 'curriculums',
-        loadComponent: () => import('./features/curriculums/manage-curriculums-page/manage-curriculums-page/manage-curriculums-page.component').then(m => m.ManageCurriculumsPageComponent)
-      },
-      {
-        // هذه هي صفحة "البنّاء" لمنهج معين لإدارة فصوله ودروسه
-        path: 'curriculums/:id',
-        loadComponent: () => import('./features/curriculums/curriculum-builder-page/curriculum-builder-page/curriculum-builder-page.component').then(m => m.CurriculumBuilderPageComponent)
-      },
-      // توجيه المسار الرئيسي /manage إلى صفحة إدارة المناهج
-      { path: '', redirectTo: 'curriculums', pathMatch: 'full' }
-      ,{
-        path: 'lessons/:id',
-        loadComponent: () => import('./features/lessons/lesson-builder-page/lesson-builder-page.component').then(m => m.LessonBuilderPageComponent),
-      },
-    ]
+    loadChildren: () =>
+      import('./features/manage/manage.routes').then((m) => m.MANAGE_ROUTES),
+    canActivate: [authGuard],
+    data: { preload: true, requiresAuth: true },
   },
-
-
-  // ==================================================
-  // #3: المسارات الافتراضية والبديلة
-  // ==================================================
   { path: '', redirectTo: '/curriculums', pathMatch: 'full' },
-  { path: '**', redirectTo: '/curriculums' } // أو يمكنك إنشاء مكون PageNotFoundComponent
+  { path: '**', redirectTo: '/curriculums' },
 ];
+
+

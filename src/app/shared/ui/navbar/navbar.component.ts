@@ -1,35 +1,37 @@
-import { Component, effect, signal } from '@angular/core';
+﻿import { Component, computed, effect, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../Core/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  standalone: true,
+  imports: [RouterLink],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css'
+  styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
-  private initialDark = localStorage.getItem('theme')==='dark';
-  themeDark=signal(this.initialDark);
+  private initialDark = localStorage.getItem('theme') === 'dark';
+  private auth = inject(AuthService);
 
-  constructor(){
-    effect(()=>{
-      if(this.themeDark()){
+  readonly themeDark = signal(this.initialDark);
+  readonly user = computed(() => this.auth.user());
+
+  constructor() {
+    effect(() => {
+      if (this.themeDark()) {
         document.documentElement.classList.add('dark');
-      }else{
+      } else {
         document.documentElement.classList.remove('dark');
       }
-      localStorage.setItem('theme' ,this.themeDark()?'dark':'light')
+      localStorage.setItem('theme', this.themeDark() ? 'dark' : 'light');
     });
   }
 
-
-
-
-
-  toggleTheme(){
-    this.themeDark.set(!this.themeDark());
-    console.log(this.themeDark())
+  toggleTheme(): void {
+    this.themeDark.update((value) => !value);
   }
 
-
-
+  logout(): void {
+    this.auth.logout();
+  }
 }

@@ -1,15 +1,18 @@
-// Add these styles for the new course sidebar
-.lesson-link {
-  &.active-lesson {
-    @apply bg-blue-600 text-white shadow-lg;
+﻿.lesson-link.active-lesson {
+  background: linear-gradient(135deg, var(--accent-500), var(--accent-700));
+  color: var(--accent-contrast);
+  box-shadow: 0 18px 32px -28px rgba(47, 149, 163, 0.9);
+}
 
-    // Make the icon stand out in the active state
-    .dark & div, .light & div {
-      @apply bg-white text-blue-600;
-    }
-  }
+.lesson-link.active-lesson .lesson-icon {
+  background: var(--accent-contrast);
+  color: var(--accent-600);
+}
 
-  &:not(.active-lesson):hover {
-    @apply bg-gray-100 dark:bg-slate-700/60;
-  }
+.lesson-link:not(.active-lesson):hover {
+  background-color: color-mix(in srgb, var(--surface-hover) 85%, transparent);
+}
+
+.dark .lesson-link:not(.active-lesson):hover {
+  background-color: color-mix(in srgb, var(--surface-muted) 70%, transparent);
 }

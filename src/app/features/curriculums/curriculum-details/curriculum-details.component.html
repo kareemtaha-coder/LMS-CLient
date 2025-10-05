@@ -80,7 +80,7 @@
             <div class="divide-y divide-slate-100 dark:divide-slate-700">
               @for (lesson of chapter.lessons; track lesson.id; let i = $index) {
                 <a
-                  [routerLink]="['/lessons', lesson.id]"
+                  [routerLink]="['/course', curriculum.id, 'lessons', lesson.id]"
                   class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 group">
 
                   <div class="flex items-center gap-4 flex-1 min-w-0">

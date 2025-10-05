@@ -1,0 +1,87 @@
+@layer components {
+  :host {
+    display: block;
+    height: 100%;
+  }
+
+  .slide-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: clamp(1.5rem, 6vw, 4rem);
+    padding-block: clamp(2rem, 7vw, 4.5rem);
+  }
+
+  .slide-figure {
+    width: min(88vw, 1120px);
+    background: color-mix(in srgb, var(--surface-base) 92%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 65%, transparent);
+    border-radius: clamp(1.75rem, 4vw, 2.75rem);
+    box-shadow: 0 28px 80px -40px rgba(20, 42, 56, 0.45);
+    backdrop-filter: blur(14px);
+    padding: clamp(1.75rem, 5vw, 3.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.75rem, 4vw, 3rem);
+    align-items: center;
+    text-align: center;
+  }
+
+  .media-shell {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .media-shell img {
+    width: min(72vw, 960px);
+    max-height: min(60vh, 620px);
+    object-fit: contain;
+    background: color-mix(in srgb, var(--surface-muted) 85%, transparent);
+    border-radius: clamp(1.25rem, 3vw, 2rem);
+    padding: clamp(1rem, 2.5vw, 1.75rem);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 18px 60px -35px rgba(16, 36, 49, 0.6);
+  }
+
+  .slide-caption {
+    max-width: min(70ch, 80%);
+    font-size: clamp(1.25rem, 2.4vw, 1.9rem);
+    line-height: 1.7;
+    font-weight: 600;
+    color: var(--text-base);
+    letter-spacing: 0.01em;
+  }
+
+  @media (max-width: 640px) {
+    .slide-figure {
+      padding: clamp(1.25rem, 6vw, 2rem);
+    }
+
+    .media-shell img {
+      width: 100%;
+      max-height: 48vh;
+      padding: clamp(0.75rem, 4vw, 1.25rem);
+    }
+
+    .slide-caption {
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+    }
+  }
+
+  .dark .slide-figure {
+    background: color-mix(in srgb, var(--surface-muted) 82%, transparent);
+    box-shadow: 0 34px 90px -50px rgba(6, 21, 29, 0.8);
+    border-color: color-mix(in srgb, var(--border-subtle) 55%, transparent);
+  }
+
+  .dark .media-shell img {
+    background: color-mix(in srgb, var(--surface-base) 30%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 24px 90px -55px rgba(0, 0, 0, 0.9);
+  }
+
+  .dark .slide-caption {
+    color: var(--text-base);
+  }
+}
