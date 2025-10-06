@@ -26,7 +26,6 @@ export class AddQuizFormComponent {
   constructor() {
     this.quizForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
-      timeLimitMinutes: [30, [Validators.required, Validators.min(1), Validators.max(300)]],
       passingScore: [70, [Validators.required, Validators.min(0), Validators.max(100)]],
       allowRetake: [true],
       maxAttempts: [3, [Validators.required, Validators.min(1), Validators.max(10)]]
@@ -40,7 +39,6 @@ export class AddQuizFormComponent {
       const request: AddQuizRequest = {
         sortOrder: this.sortOrder,
         title: this.quizForm.value.title,
-        timeLimitMinutes: this.quizForm.value.timeLimitMinutes,
         passingScore: this.quizForm.value.passingScore,
         allowRetake: this.quizForm.value.allowRetake,
         maxAttempts: this.quizForm.value.maxAttempts
@@ -78,7 +76,6 @@ export class AddQuizFormComponent {
   }
 
   get title() { return this.quizForm.get('title'); }
-  get timeLimitMinutes() { return this.quizForm.get('timeLimitMinutes'); }
   get passingScore() { return this.quizForm.get('passingScore'); }
   get maxAttempts() { return this.quizForm.get('maxAttempts'); }
 }

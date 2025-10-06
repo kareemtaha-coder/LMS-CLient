@@ -1,7 +1,8 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { QuizContent, QuestionType, QuizQuestion, QuizAnswer } from '../../../Core/api/api-models';
+import { QuizContent, QuestionType, QuizQuestion, QuizAnswer, QuizResult, EvaluateQuizRequest, QuestionAnswerRequest } from '../../../Core/api/api-models';
+import { LessonService } from '../lesson.service';
 
 export interface QuizSubmission {
   quizId: string;
@@ -21,18 +22,19 @@ export class QuizTakeComponent {
   @Input() quiz!: QuizContent;
   @Output() quizSubmitted = new EventEmitter<QuizSubmission>();
 
+  private lessonService = inject(LessonService);
+
   // Quiz state
   isQuizStarted = signal(false);
   isQuizSubmitted = signal(false);
-  timeRemaining = signal(0);
+  isEvaluating = signal(false);
   currentQuestionIndex = signal(0);
   
   // User answers
   userAnswers: { [questionId: string]: string | string[] } = {};
   
-  // Timer
-  private timerInterval: any;
-  private startTime: Date = new Date();
+  // Quiz results
+  quizResult = signal<QuizResult | null>(null);
 
   readonly QuestionType = QuestionType;
 
@@ -40,7 +42,7 @@ export class QuizTakeComponent {
     return {
       [QuestionType.MultipleChoice]: 'اختيار من متعدد',
       [QuestionType.TrueFalse]: 'صح أو خطأ',
-      [QuestionType.FillInTheBlank]: 'ملء الفراغات',
+      [QuestionType.FillInTheBlank]: 'ملء الفراغ',
       [QuestionType.ShortAnswer]: 'إجابة قصيرة',
       [QuestionType.Essay]: 'مقال'
     };
@@ -59,28 +61,8 @@ export class QuizTakeComponent {
     return this.totalQuestions > 0 ? ((this.currentQuestionIndex() + 1) / this.totalQuestions) * 100 : 0;
   }
 
-  get timeRemainingFormatted(): string {
-    const minutes = Math.floor(this.timeRemaining() / 60);
-    const seconds = this.timeRemaining() % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  }
-
   startQuiz(): void {
     this.isQuizStarted.set(true);
-    this.startTime = new Date();
-    this.timeRemaining.set(this.quiz.timeLimitMinutes * 60);
-    this.startTimer();
-  }
-
-  private startTimer(): void {
-    this.timerInterval = setInterval(() => {
-      const remaining = this.timeRemaining() - 1;
-      this.timeRemaining.set(remaining);
-      
-      if (remaining <= 0) {
-        this.submitQuiz();
-      }
-    }, 1000);
   }
 
   nextQuestion(): void {
@@ -129,21 +111,42 @@ export class QuizTakeComponent {
   }
 
   submitQuiz(): void {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-    }
+    if (this.isQuizSubmitted() || this.isEvaluating()) return;
 
-    const timeSpent = Math.floor((new Date().getTime() - this.startTime.getTime()) / 1000);
+    this.isEvaluating.set(true);
     
-    const submission: QuizSubmission = {
-      quizId: this.quiz.id,
-      answers: this.userAnswers,
-      timeSpent: timeSpent,
-      submittedAt: new Date()
-    };
+    // Prepare answers for evaluation
+    const answers: QuestionAnswerRequest[] = this.quiz.questions.map(question => {
+      const userAnswer = this.userAnswers[question.id];
+      return {
+        questionId: question.id,
+        selectedAnswerId: Array.isArray(userAnswer) ? userAnswer[0] : userAnswer || ''
+      };
+    });
 
-    this.isQuizSubmitted.set(true);
-    this.quizSubmitted.emit(submission);
+    const request: EvaluateQuizRequest = { answers };
+
+    this.lessonService.evaluateQuiz(this.quiz.id, request).subscribe({
+      next: (result) => {
+        this.quizResult.set(result);
+        this.isQuizSubmitted.set(true);
+        this.isEvaluating.set(false);
+        
+        const submission: QuizSubmission = {
+          quizId: this.quiz.id,
+          answers: { ...this.userAnswers },
+          timeSpent: 0,
+          submittedAt: new Date()
+        };
+
+        this.quizSubmitted.emit(submission);
+      },
+      error: (error) => {
+        console.error('Error evaluating quiz:', error);
+        this.isEvaluating.set(false);
+        // Handle error - maybe show a message to user
+      }
+    });
   }
 
   calculateScore(): { correct: number; total: number; percentage: number } {
@@ -172,13 +175,7 @@ export class QuizTakeComponent {
     switch (question.questionType) {
       case QuestionType.MultipleChoice:
         return correctAnswers.some(correct => correct.answerText === userAnswer);
-      
-      case QuestionType.TrueFalse:
-        return correctAnswers.some(correct => correct.answerText === userAnswer);
-      
-      case QuestionType.FillInTheBlank:
-      case QuestionType.ShortAnswer:
-      case QuestionType.Essay:
+
         // For text-based answers, we'll do a simple string comparison
         // In a real application, you might want more sophisticated matching
         return correctAnswers.some(correct => 
@@ -204,10 +201,6 @@ export class QuizTakeComponent {
     return Math;
   }
 
-  // Helper method for template
-  get timeSpent(): number {
-    return Math.floor((new Date().getTime() - this.startTime.getTime()) / 1000);
-  }
 
   // Helper method for template
   goBack(): void {
@@ -216,9 +209,16 @@ export class QuizTakeComponent {
     console.log('Go back to lesson');
   }
 
+  retakeQuiz(): void {
+    this.isQuizStarted.set(false);
+    this.isQuizSubmitted.set(false);
+    this.isEvaluating.set(false);
+    this.currentQuestionIndex.set(0);
+    this.userAnswers = {};
+    this.quizResult.set(null);
+  }
+
   ngOnDestroy(): void {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-    }
+    // No timer to clean up anymore
   }
 }

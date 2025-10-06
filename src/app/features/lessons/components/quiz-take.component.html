@@ -5,10 +5,6 @@
       <h2 class="quiz-title">{{ quiz.title }}</h2>
       <div class="quiz-info">
         <div class="info-item">
-          <i class="icon-clock"></i>
-          <span>مدة الاختبار: {{ quiz.timeLimitMinutes }} دقيقة</span>
-        </div>
-        <div class="info-item">
           <i class="icon-target"></i>
           <span>نسبة النجاح: {{ quiz.passingScore }}%</span>
         </div>
@@ -29,7 +25,6 @@
         <li>اقرأ كل سؤال بعناية قبل الإجابة</li>
         <li>يمكنك التنقل بين الأسئلة باستخدام الأزرار</li>
         <li>تأكد من الإجابة على جميع الأسئلة قبل التسليم</li>
-        <li>سيتم إيقاف الاختبار تلقائياً عند انتهاء الوقت</li>
       </ul>
     </div>
     
@@ -54,10 +49,6 @@
         </div>
       </div>
       
-      <div class="quiz-timer" [class.warning]="timeRemaining() < 300">
-        <i class="icon-clock"></i>
-        {{ timeRemainingFormatted }}
-      </div>
     </div>
 
     <!-- Question Navigation -->
@@ -212,44 +203,50 @@
     </div>
   </div>
 
+
   <!-- Quiz Results -->
-  <div class="quiz-results" *ngIf="isQuizSubmitted()">
+  <div class="quiz-results" *ngIf="isQuizSubmitted() && quizResult()">
     <div class="results-header">
-      <div class="result-icon" [class.passed]="isPassed()" [class.failed]="!isPassed()">
-        <i [class]="isPassed() ? 'icon-check-circle' : 'icon-x-circle'"></i>
-      </div>
-      
-      <h2 class="result-title">
-        {{ isPassed() ? 'مبروك! لقد نجحت في الاختبار' : 'لم تنجح في الاختبار هذه المرة' }}
-      </h2>
-    </div>
-    
-    <div class="results-stats">
-      <div class="stat-item">
-        <span class="stat-label">درجتك:</span>
-        <span class="stat-value">{{ calculateScore().correct }} / {{ calculateScore().total }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">النسبة المئوية:</span>
-        <span class="stat-value">{{ calculateScore().percentage }}%</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">نسبة النجاح المطلوبة:</span>
-        <span class="stat-value">{{ quiz.passingScore }}%</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">الوقت المستغرق:</span>
-        <span class="stat-value">{{ Math.floor(timeSpent / 60) }}:{{ (timeSpent % 60).toString().padStart(2, '0') }}</span>
+      <h2 class="results-title">نتائج الاختبار</h2>
+      <div class="score-summary">
+        <div class="score-circle" [class.passed]="quizResult()!.passed" [class.failed]="!quizResult()!.passed">
+          <span class="score-percentage">{{ quizResult()!.score }}%</span>
+        </div>
+        <div class="score-details">
+          <h3 [class.passed]="quizResult()!.passed" [class.failed]="!quizResult()!.passed">
+            {{ quizResult()!.passed ? 'نجحت في الاختبار!' : 'لم تنجح في الاختبار' }}
+          </h3>
+          <p class="score-breakdown">
+            {{ quizResult()!.correctAnswers }} من {{ quizResult()!.totalQuestions }} إجابة صحيحة
+          </p>
+        </div>
       </div>
     </div>
-    
+
+    <div class="question-results">
+      <h3>تفاصيل الإجابات</h3>
+      <div class="question-result-item" *ngFor="let questionResult of quizResult()!.questionResults; let i = index">
+        <div class="question-header">
+          <span class="question-number">سؤال {{ i + 1 }}</span>
+          <span class="result-indicator" [class.correct]="questionResult.isCorrect" [class.incorrect]="!questionResult.isCorrect">
+            <i [class]="questionResult.isCorrect ? 'icon-check' : 'icon-cross'"></i>
+            {{ questionResult.isCorrect ? 'صحيح' : 'خطأ' }}
+          </span>
+        </div>
+        <div class="question-explanation">
+          <p>{{ questionResult.explanation }}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="results-actions">
-      <button class="btn btn-primary" (click)="startQuiz()" *ngIf="quiz.allowRetake">
+      <button class="btn btn-secondary" (click)="goBack()">
+        <i class="icon-arrow-left"></i>
+        العودة للدرس
+      </button>
+      <button class="btn btn-primary" *ngIf="quiz.allowRetake" (click)="retakeQuiz()">
         <i class="icon-repeat"></i>
         إعادة المحاولة
-      </button>
-      <button class="btn btn-secondary" (click)="goBack()">
-        العودة للدرس
       </button>
     </div>
   </div>

@@ -238,7 +238,6 @@ export interface QuizQuestion {
  */
 export interface QuizContent extends LessonContentBase {
   contentType: 'Quiz';
-  timeLimitMinutes: number;
   passingScore: number;
   allowRetake: boolean;
   maxAttempts: number;
@@ -435,7 +434,6 @@ export interface ReorderLessonsRequest {
 export interface AddQuizRequest {
   sortOrder: number;
   title: string;
-  timeLimitMinutes?: number;
   passingScore?: number;
   allowRetake?: boolean;
   maxAttempts?: number;
@@ -466,8 +464,32 @@ export interface AddAnswerRequest {
  * As per PUT /api/Quiz/quiz/{quizContentId}/settings
  */
 export interface UpdateQuizSettingsRequest {
-  timeLimitMinutes: number;
   passingScore: number;
   allowRetake: boolean;
   maxAttempts: number;
+}
+
+export interface QuestionAnswerRequest {
+  questionId: string;
+  selectedAnswerId: string;
+}
+
+export interface EvaluateQuizRequest {
+  answers: QuestionAnswerRequest[];
+}
+
+export interface QuestionResult {
+  questionId: string;
+  isCorrect: boolean;
+  selectedAnswerId?: string;
+  correctAnswerId?: string;
+  explanation: string;
+}
+
+export interface QuizResult {
+  totalQuestions: number;
+  correctAnswers: number;
+  score: number;
+  passed: boolean;
+  questionResults: QuestionResult[];
 }

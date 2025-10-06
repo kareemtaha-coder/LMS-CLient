@@ -35,7 +35,6 @@ export class QuizContentComponent {
   // Quiz settings
   showSettingsForm = false;
   quizSettings = {
-    timeLimitMinutes: 30,
     passingScore: 70,
     allowRetake: true,
     maxAttempts: 3
@@ -47,7 +46,7 @@ export class QuizContentComponent {
     return {
       [QuestionType.MultipleChoice]: 'اختيار من متعدد',
       [QuestionType.TrueFalse]: 'صح أو خطأ',
-      [QuestionType.FillInTheBlank]: 'ملء الفراغات',
+      [QuestionType.FillInTheBlank]: 'ملء الفراغ',
       [QuestionType.ShortAnswer]: 'إجابة قصيرة',
       [QuestionType.Essay]: 'مقال'
     };
@@ -59,7 +58,6 @@ export class QuizContentComponent {
 
   private initializeQuizSettings() {
     this.quizSettings = {
-      timeLimitMinutes: this.quiz.timeLimitMinutes,
       passingScore: this.quiz.passingScore,
       allowRetake: this.quiz.allowRetake,
       maxAttempts: this.quiz.maxAttempts

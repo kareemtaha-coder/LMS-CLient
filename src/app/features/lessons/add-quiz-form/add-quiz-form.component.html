@@ -22,24 +22,6 @@
       </div>
     </div>
 
-    <!-- مدة الاختبار -->
-    <div class="form-group">
-      <label for="timeLimitMinutes" class="form-label">مدة الاختبار (بالدقائق) *</label>
-      <input
-        type="number"
-        id="timeLimitMinutes"
-        formControlName="timeLimitMinutes"
-        class="form-control"
-        min="1"
-        max="300"
-        [class.is-invalid]="timeLimitMinutes?.invalid && timeLimitMinutes?.touched"
-      />
-      <div class="invalid-feedback" *ngIf="timeLimitMinutes?.invalid && timeLimitMinutes?.touched">
-        <span *ngIf="timeLimitMinutes?.errors?.['required']">مدة الاختبار مطلوبة</span>
-        <span *ngIf="timeLimitMinutes?.errors?.['min']">يجب أن تكون المدة دقيقة واحدة على الأقل</span>
-        <span *ngIf="timeLimitMinutes?.errors?.['max']">يجب ألا تتجاوز المدة 300 دقيقة</span>
-      </div>
-    </div>
 
     <!-- نسبة النجاح -->
     <div class="form-group">

@@ -5,10 +5,6 @@
       <h3 class="quiz-title">{{ quiz.title }}</h3>
       <div class="quiz-meta">
         <span class="meta-item">
-          <i class="icon-clock"></i>
-          {{ quiz.timeLimitMinutes }} دقيقة
-        </span>
-        <span class="meta-item">
           <i class="icon-target"></i>
           {{ quiz.passingScore }}% للنجاح
         </span>
@@ -43,16 +39,6 @@
   <div class="quiz-settings-form" *ngIf="showSettingsForm">
     <h4>إعدادات الاختبار</h4>
     <div class="settings-grid">
-      <div class="setting-item">
-        <label>مدة الاختبار (دقيقة)</label>
-        <input 
-          type="number" 
-          [(ngModel)]="quizSettings.timeLimitMinutes" 
-          min="1" 
-          max="300"
-          class="form-control"
-        />
-      </div>
       <div class="setting-item">
         <label>نسبة النجاح (%)</label>
         <input 
@@ -134,7 +120,7 @@
           <select [(ngModel)]="newQuestion.questionType" class="form-control">
             <option [value]="QuestionType.MultipleChoice">اختيار من متعدد</option>
             <option [value]="QuestionType.TrueFalse">صح أو خطأ</option>
-            <option [value]="QuestionType.FillInTheBlank">ملء الفراغات</option>
+            <option [value]="QuestionType.FillInTheBlank">ملء الفراغ</option>
             <option [value]="QuestionType.ShortAnswer">إجابة قصيرة</option>
             <option [value]="QuestionType.Essay">مقال</option>
           </select>

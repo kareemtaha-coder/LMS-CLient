@@ -1,5 +1,6 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
-import { catchError, Observable, of, switchMap, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import {
   AddExampleItemRequest,
   AddExamplesGridRequest,
@@ -18,6 +19,8 @@ import {
   AddQuizRequest,
   AddQuestionRequest,
   AddAnswerRequest,
+  EvaluateQuizRequest,
+  QuizResult,
   UpdateQuizSettingsRequest,
   QuizContent,
 } from '../../Core/api/api-models';
@@ -34,6 +37,8 @@ interface LessonState {
 })
 export class LessonService {
   private apiService = inject(ApiService);
+  private http = inject(HttpClient);
+  private apiUrl = 'https://almehrab.runasp.net/api';
 
   #state = signal<LessonState>({
     lesson: null,
@@ -72,11 +77,22 @@ export class LessonService {
           this.selectContent(response.contents[0]);
         }
       }),
-      catchError(() => {
+      catchError((error) => {
+        console.error('Error loading lesson:', error);
+        let errorMessage = 'Failed to load lesson details.';
+        
+        if (error.status === 404) {
+          errorMessage = 'Lesson not found.';
+        } else if (error.status === 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else if (error.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
         this.#state.update((state) => ({
           ...state,
           loading: false,
-          error: 'Failed to load lesson details.',
+          error: errorMessage,
         }));
         this.activeLessonId.set(null);
         return of(null);
@@ -100,10 +116,18 @@ export class LessonService {
         switchMap(() => this.loadLessonById(lessonId)),
         catchError((err) => {
           console.error('Failed to add rich text content', err);
+          let errorMessage = 'Failed to add content.';
+          
+          if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else if (err.status === 0) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+          
           this.#state.update((s) => ({
             ...s,
             loading: false,
-            error: 'Failed to add content.',
+            error: errorMessage,
           }));
           return of(null);
         })
@@ -122,6 +146,19 @@ export class LessonService {
         switchMap(() => this.loadLessonById(lessonId)),
         catchError((err) => {
           console.error('Failed to reorder content', err);
+          let errorMessage = 'Failed to reorder content.';
+          
+          if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else if (err.status === 0) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+          
+          this.#state.update((s) => ({
+            ...s,
+            loading: false,
+            error: errorMessage,
+          }));
           return of(null);
         })
       );
@@ -139,10 +176,18 @@ export class LessonService {
         switchMap(() => this.loadLessonById(lessonId)),
         catchError((err) => {
           console.error('Failed to add video content', err);
+          let errorMessage = 'Failed to add video.';
+          
+          if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else if (err.status === 0) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+          
           this.#state.update((s) => ({
             ...s,
             loading: false,
-            error: 'Failed to add video.',
+            error: errorMessage,
           }));
           return of(null);
         })
@@ -167,7 +212,19 @@ export class LessonService {
         switchMap(() => this.loadLessonById(lessonId)),
         catchError((err) => {
           console.error('Failed to add image content', err);
-          // Handle error state
+          let errorMessage = 'Failed to add image.';
+          
+          if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else if (err.status === 0) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+          
+          this.#state.update((s) => ({
+            ...s,
+            loading: false,
+            error: errorMessage,
+          }));
           return of(null);
         })
       );
@@ -183,7 +240,19 @@ export class LessonService {
         switchMap(() => this.loadLessonById(lessonId)),
         catchError((err) => {
           console.error('Failed to add examples grid', err);
-          // Handle error state
+          let errorMessage = 'Failed to add examples grid.';
+          
+          if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else if (err.status === 0) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+          
+          this.#state.update((s) => ({
+            ...s,
+            loading: false,
+            error: errorMessage,
+          }));
           return of(null);
         })
       );
@@ -234,6 +303,19 @@ export class LessonService {
         switchMap(() => of(this.#state().lesson)),
         catchError((err) => {
           console.error(`Failed to delete example item ${itemId}`, err);
+          let errorMessage = 'Failed to delete example item.';
+          
+          if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else if (err.status === 0) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+          
+          this.#state.update((s) => ({
+            ...s,
+            loading: false,
+            error: errorMessage,
+          }));
           return of(null);
         })
       );
@@ -271,6 +353,19 @@ export class LessonService {
       }),
       catchError((err) => {
         console.error('[Service] API call failed.', err);
+        let errorMessage = 'Failed to add example item.';
+        
+        if (err.status === 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else if (err.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
+        this.#state.update((s) => ({
+          ...s,
+          loading: false,
+          error: errorMessage,
+        }));
         return of(null);
       })
     );
@@ -303,6 +398,19 @@ public updateRichTextContent(lessonId: string, contentId: string, request: Updat
     switchMap(() => of(this.#state().lesson)),
     catchError(err => {
       console.error('Failed to update rich text content', err);
+      let errorMessage = 'Failed to update rich text content.';
+      
+      if (err.status === 500) {
+        errorMessage = 'Server error occurred. Please try again later.';
+      } else if (err.status === 0) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      this.#state.update((s) => ({
+        ...s,
+        loading: false,
+        error: errorMessage,
+      }));
       return of(null);
     })
   );
@@ -336,6 +444,19 @@ public updateVideoContent(lessonId: string, contentId: string, request: UpdateVi
     switchMap(() => of(this.#state().lesson)),
     catchError(err => {
       console.error('Failed to update video content', err);
+      let errorMessage = 'Failed to update video content.';
+      
+      if (err.status === 500) {
+        errorMessage = 'Server error occurred. Please try again later.';
+      } else if (err.status === 0) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      this.#state.update((s) => ({
+        ...s,
+        loading: false,
+        error: errorMessage,
+      }));
       return of(null);
     })
   );
@@ -358,6 +479,19 @@ public updateImageContent(lessonId: string, contentId: string, request: UpdateIm
     switchMap(() => this.loadLessonById(lessonId)),
     catchError(err => {
       console.error('Failed to update image content', err);
+      let errorMessage = 'Failed to update image content.';
+      
+      if (err.status === 500) {
+        errorMessage = 'Server error occurred. Please try again later.';
+      } else if (err.status === 0) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      this.#state.update((s) => ({
+        ...s,
+        loading: false,
+        error: errorMessage,
+      }));
       return of(null);
     })
   );
@@ -377,10 +511,18 @@ public addQuizContent(lessonId: string, request: AddQuizRequest): Observable<Les
       switchMap(() => this.loadLessonById(lessonId)),
       catchError((err) => {
         console.error('Failed to add quiz content', err);
+        let errorMessage = 'Failed to add quiz content.';
+        
+        if (err.status === 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else if (err.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
         this.#state.update((s) => ({
           ...s,
           loading: false,
-          error: 'Failed to add quiz content.',
+          error: errorMessage,
         }));
         return of(null);
       })
@@ -400,6 +542,19 @@ public addQuestionToQuiz(quizContentId: string, request: AddQuestionRequest): Ob
       }),
       catchError((err) => {
         console.error('Failed to add question to quiz', err);
+        let errorMessage = 'Failed to add question to quiz.';
+        
+        if (err.status === 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else if (err.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
+        this.#state.update((s) => ({
+          ...s,
+          loading: false,
+          error: errorMessage,
+        }));
         return of(null);
       })
     );
@@ -418,6 +573,19 @@ public addAnswerToQuestion(questionId: string, request: AddAnswerRequest): Obser
       }),
       catchError((err) => {
         console.error('Failed to add answer to question', err);
+        let errorMessage = 'Failed to add answer to question.';
+        
+        if (err.status === 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else if (err.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
+        this.#state.update((s) => ({
+          ...s,
+          loading: false,
+          error: errorMessage,
+        }));
         return of(null);
       })
     );
@@ -436,8 +604,37 @@ public updateQuizSettings(quizContentId: string, request: UpdateQuizSettingsRequ
       }),
       catchError((err) => {
         console.error('Failed to update quiz settings', err);
+        let errorMessage = 'Failed to update quiz settings.';
+        
+        if (err.status === 500) {
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else if (err.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
+        this.#state.update((s) => ({
+          ...s,
+          loading: false,
+          error: errorMessage,
+        }));
         return of(null);
       })
     );
-}
+  }
+
+  evaluateQuiz(quizContentId: string, request: EvaluateQuizRequest): Observable<QuizResult> {
+    return this.http.post<QuizResult>(`${this.apiUrl}/Quiz/quiz/${quizContentId}/evaluate`, request).pipe(
+      catchError(error => {
+        console.error('Error evaluating quiz:', error);
+        if (error.status === 404) {
+          return throwError(() => new Error('الاختبار غير موجود'));
+        } else if (error.status === 500) {
+          return throwError(() => new Error('خطأ في الخادم. يرجى المحاولة مرة أخرى'));
+        } else if (error.status === 0) {
+          return throwError(() => new Error('خطأ في الاتصال. تحقق من اتصالك بالإنترنت'));
+        }
+        return throwError(() => new Error('فشل في تقييم الاختبار'));
+      })
+    );
+  }
 }
