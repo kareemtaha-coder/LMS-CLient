@@ -1,15 +1,8 @@
-import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, Input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { QuizContent, QuestionType, QuizQuestion, QuizAnswer, QuizResult, EvaluateQuizRequest, QuestionAnswerRequest } from '../../../Core/api/api-models';
+import { QuizContent, QuizQuestion, QuizAnswer } from '../../../Core/api/api-models';
 import { LessonService } from '../lesson.service';
-
-export interface QuizSubmission {
-  quizId: string;
-  answers: { [questionId: string]: string | string[] };
-  timeSpent: number;
-  submittedAt: Date;
-}
 
 @Component({
   selector: 'app-quiz-take',
@@ -20,205 +13,91 @@ export interface QuizSubmission {
 })
 export class QuizTakeComponent {
   @Input() quiz!: QuizContent;
-  @Output() quizSubmitted = new EventEmitter<QuizSubmission>();
-
   private lessonService = inject(LessonService);
 
-  // Quiz state
-  isQuizStarted = signal(false);
-  isQuizSubmitted = signal(false);
-  isEvaluating = signal(false);
+  // Component state
+  isStarted = signal(false);
+  isSubmitted = signal(false);
   currentQuestionIndex = signal(0);
-  
-  // User answers
-  userAnswers: { [questionId: string]: string | string[] } = {};
-  
-  // Quiz results
-  quizResult = signal<QuizResult | null>(null);
+  selectedAnswers = signal<Map<string, string>>(new Map());
 
-  readonly QuestionType = QuestionType;
+  // Get current question
+  get currentQuestion(): QuizQuestion | null {
+    if (!this.quiz?.questions || this.currentQuestionIndex() >= this.quiz.questions.length) {
+      return null;
+    }
+    return this.quiz.questions[this.currentQuestionIndex()];
+  }
 
-  get questionTypeLabels() {
+  // Start quiz
+  startQuiz() {
+    this.isStarted.set(true);
+    this.currentQuestionIndex.set(0);
+    this.selectedAnswers.set(new Map());
+    this.isSubmitted.set(false);
+  }
+
+  // Select answer
+  selectAnswer(questionId: string, answerId: string) {
+    const answers = new Map(this.selectedAnswers());
+    answers.set(questionId, answerId);
+    this.selectedAnswers.set(answers);
+  }
+
+  // Navigate questions
+  nextQuestion() {
+    if (this.currentQuestionIndex() < this.quiz.questions.length - 1) {
+      this.currentQuestionIndex.update(i => i + 1);
+    }
+  }
+
+  previousQuestion() {
+    if (this.currentQuestionIndex() > 0) {
+      this.currentQuestionIndex.update(i => i - 1);
+    }
+  }
+
+  // Submit quiz - Calculate results on frontend
+  submitQuiz() {
+    this.isSubmitted.set(true);
+  }
+
+  // Get score
+  getScore() {
+    let correct = 0;
+    const total = this.quiz.questions.length;
+
+    this.quiz.questions.forEach(question => {
+      const selectedAnswerId = this.selectedAnswers().get(question.id);
+      if (selectedAnswerId) {
+        const correctAnswer = question.answers.find(a => a.isCorrect);
+        if (correctAnswer && correctAnswer.id === selectedAnswerId) {
+          correct++;
+        }
+      }
+    });
+
     return {
-      [QuestionType.MultipleChoice]: 'اختيار من متعدد',
-      [QuestionType.TrueFalse]: 'صح أو خطأ',
-      [QuestionType.FillInTheBlank]: 'ملء الفراغ',
-      [QuestionType.ShortAnswer]: 'إجابة قصيرة',
-      [QuestionType.Essay]: 'مقال'
+      correct,
+      total,
+      percentage: total > 0 ? Math.round((correct / total) * 100) : 0
     };
   }
 
-  get currentQuestion(): QuizQuestion | null {
-    const index = this.currentQuestionIndex();
-    return this.quiz.questions[index] || null;
+  // Retake quiz
+  retakeQuiz() {
+    this.startQuiz();
   }
 
-  get totalQuestions(): number {
-    return this.quiz.questions.length;
+  // Check if answer is selected
+  isAnswerSelected(questionId: string, answerId: string): boolean {
+    return this.selectedAnswers().get(questionId) === answerId;
   }
 
-  get progressPercentage(): number {
-    return this.totalQuestions > 0 ? ((this.currentQuestionIndex() + 1) / this.totalQuestions) * 100 : 0;
-  }
-
-  startQuiz(): void {
-    this.isQuizStarted.set(true);
-  }
-
-  nextQuestion(): void {
-    if (this.currentQuestionIndex() < this.totalQuestions - 1) {
-      this.currentQuestionIndex.set(this.currentQuestionIndex() + 1);
-    }
-  }
-
-  previousQuestion(): void {
-    if (this.currentQuestionIndex() > 0) {
-      this.currentQuestionIndex.set(this.currentQuestionIndex() - 1);
-    }
-  }
-
-  goToQuestion(index: number): void {
-    if (index >= 0 && index < this.totalQuestions) {
-      this.currentQuestionIndex.set(index);
-    }
-  }
-
-  onAnswerChange(questionId: string, answer: string | string[]): void {
-    this.userAnswers[questionId] = answer;
-  }
-
-  onTextInputChange(questionId: string, event: Event): void {
-    const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    this.userAnswers[questionId] = target.value;
-  }
-
-  getAnswerForQuestion(questionId: string): string | string[] {
-    return this.userAnswers[questionId] || '';
-  }
-
-  isQuestionAnswered(questionId: string): boolean {
-    const answer = this.userAnswers[questionId];
-    if (Array.isArray(answer)) {
-      return answer.length > 0;
-    }
-    return Boolean(answer && answer.toString().trim() !== '');
-  }
-
-  getAnsweredQuestionsCount(): number {
-    return Object.keys(this.userAnswers).filter(questionId => 
-      this.isQuestionAnswered(questionId)
-    ).length;
-  }
-
-  submitQuiz(): void {
-    if (this.isQuizSubmitted() || this.isEvaluating()) return;
-
-    this.isEvaluating.set(true);
-    
-    // Prepare answers for evaluation
-    const answers: QuestionAnswerRequest[] = this.quiz.questions.map(question => {
-      const userAnswer = this.userAnswers[question.id];
-      return {
-        questionId: question.id,
-        selectedAnswerId: Array.isArray(userAnswer) ? userAnswer[0] : userAnswer || ''
-      };
-    });
-
-    const request: EvaluateQuizRequest = { answers };
-
-    this.lessonService.evaluateQuiz(this.quiz.id, request).subscribe({
-      next: (result) => {
-        this.quizResult.set(result);
-        this.isQuizSubmitted.set(true);
-        this.isEvaluating.set(false);
-        
-        const submission: QuizSubmission = {
-          quizId: this.quiz.id,
-          answers: { ...this.userAnswers },
-          timeSpent: 0,
-          submittedAt: new Date()
-        };
-
-        this.quizSubmitted.emit(submission);
-      },
-      error: (error) => {
-        console.error('Error evaluating quiz:', error);
-        this.isEvaluating.set(false);
-        // Handle error - maybe show a message to user
-      }
-    });
-  }
-
-  calculateScore(): { correct: number; total: number; percentage: number } {
-    let correct = 0;
-    let total = 0;
-
-    this.quiz.questions.forEach(question => {
-      total += question.points;
-      const userAnswer = this.userAnswers[question.id];
-      
-      if (this.isAnswerCorrect(question, userAnswer)) {
-        correct += question.points;
-      }
-    });
-
-    const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
-    
-    return { correct, total, percentage };
-  }
-
-  private isAnswerCorrect(question: QuizQuestion, userAnswer: string | string[]): boolean {
-    if (!userAnswer) return false;
-
-    const correctAnswers = question.answers.filter(answer => answer.isCorrect);
-    
-    switch (question.questionType) {
-      case QuestionType.MultipleChoice:
-        return correctAnswers.some(correct => correct.answerText === userAnswer);
-
-        // For text-based answers, we'll do a simple string comparison
-        // In a real application, you might want more sophisticated matching
-        return correctAnswers.some(correct => 
-          correct.answerText.toLowerCase().trim() === (userAnswer as string).toLowerCase().trim()
-        );
-      
-      default:
-        return false;
-    }
-  }
-
-  isPassed(): boolean {
-    const score = this.calculateScore();
-    return score.percentage >= this.quiz.passingScore;
-  }
-
-  getQuestionTypeLabel(questionType: QuestionType): string {
-    return this.questionTypeLabels[questionType] || 'غير محدد';
-  }
-
-  // Helper method for template
-  get Math() {
-    return Math;
-  }
-
-
-  // Helper method for template
-  goBack(): void {
-    // Implementation depends on your routing setup
-    // For now, we'll just log
-    console.log('Go back to lesson');
-  }
-
-  retakeQuiz(): void {
-    this.isQuizStarted.set(false);
-    this.isQuizSubmitted.set(false);
-    this.isEvaluating.set(false);
-    this.currentQuestionIndex.set(0);
-    this.userAnswers = {};
-    this.quizResult.set(null);
-  }
-
-  ngOnDestroy(): void {
-    // No timer to clean up anymore
+  // Check if answer is correct (for results display)
+  isAnswerCorrect(question: QuizQuestion, answerId: string): boolean {
+    const answer = question.answers.find(a => a.id === answerId);
+    return answer?.isCorrect || false;
   }
 }
+

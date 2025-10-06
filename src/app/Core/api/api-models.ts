@@ -203,17 +203,6 @@ export interface ExamplesGridContent extends LessonContentBase {
 // =================================================================
 
 /**
- * [cite_start]Represents the possible question types for quiz questions. [cite: QuestionType enum]
- */
-export enum QuestionType {
-  MultipleChoice = 1,
-  TrueFalse = 2,
-  FillInTheBlank = 3,
-  ShortAnswer = 4,
-  Essay = 5
-}
-
-/**
  * Represents a single answer option for a quiz question.
  */
 export interface QuizAnswer {
@@ -224,24 +213,105 @@ export interface QuizAnswer {
 
 /**
  * Represents a single question within a quiz.
+ * Simplified: Each question is worth 1 point (based on number of questions)
+ * Only multiple choice type is supported
  */
 export interface QuizQuestion {
   id: string; // guid
   questionText: string;
-  questionType: QuestionType;
-  points: number;
   answers: QuizAnswer[];
 }
 
 /**
  * Represents a quiz content block within a lesson.
+ * Simplified: No settings, just title and questions
  */
 export interface QuizContent extends LessonContentBase {
   contentType: 'Quiz';
-  passingScore: number;
-  allowRetake: boolean;
-  maxAttempts: number;
   questions: QuizQuestion[];
+}
+
+// =================================================================
+// #region Comprehensive Quiz Types (Simplified)
+// =================================================================
+
+/** 
+ * Request for creating a comprehensive quiz with questions and answers
+ * Simplified: No passing score, retake settings, or question types
+ * Each question is worth 1 point automatically
+ */
+export interface CreateComprehensiveQuizRequest {
+  sortOrder: number;
+  title: string;
+  questions?: QuestionRequest[];
+}
+
+/** 
+ * Request for updating a comprehensive quiz
+ * Simplified: Only title and questions
+ */
+export interface UpdateComprehensiveQuizRequest {
+  title: string;
+  questions: UpdateQuestionRequest[];
+}
+
+/** 
+ * Question request for comprehensive quiz
+ * Simplified: Only multiple choice, no points field
+ */
+export interface QuestionRequest {
+  questionText: string;
+  answers?: AnswerRequest[];
+}
+
+/** 
+ * Update question request for comprehensive quiz
+ * Simplified: Only multiple choice, no points field
+ */
+export interface UpdateQuestionRequest {
+  id?: string | null; // null for new questions
+  questionText: string;
+  answers?: UpdateAnswerRequest[];
+}
+
+/** Answer request for comprehensive quiz */
+export interface AnswerRequest {
+  answerText: string;
+  isCorrect: boolean;
+}
+
+/** Update answer request for comprehensive quiz */
+export interface UpdateAnswerRequest {
+  id?: string | null; // null for new answers
+  answerText: string;
+  isCorrect: boolean;
+}
+
+/** 
+ * Response for comprehensive quiz operations
+ * Simplified: No settings, just title and questions
+ */
+export interface QuizContentResponse {
+  id: string;
+  title: string;
+  questions: QuestionResponse[];
+}
+
+/** 
+ * Question response for comprehensive quiz
+ * Simplified: Only multiple choice, no points field
+ */
+export interface QuestionResponse {
+  id: string;
+  questionText: string;
+  answers: AnswerResponse[];
+}
+
+/** Answer response for comprehensive quiz */
+export interface AnswerResponse {
+  id: string;
+  answerText: string;
+  isCorrect: boolean;
 }
 
 /** A union of all possible lesson content types. */
@@ -424,72 +494,7 @@ export interface ReorderLessonsRequest {
 }
 
 // =================================================================
-// #region Quiz API Requests
+// #region Quiz API Requests (Legacy - Deprecated)
 // =================================================================
-
-/**
- * Represents the request body for adding a quiz to a lesson.
- * As per POST /api/Quiz/lessons/{lessonId}/quiz
- */
-export interface AddQuizRequest {
-  sortOrder: number;
-  title: string;
-  passingScore?: number;
-  allowRetake?: boolean;
-  maxAttempts?: number;
-}
-
-/**
- * Represents the request body for adding a question to a quiz.
- * As per POST /api/Quiz/quiz/{quizContentId}/questions
- */
-export interface AddQuestionRequest {
-  questionText: string;
-  questionType: QuestionType;
-  points?: number;
-}
-
-/**
- * Represents the request body for adding an answer to a question.
- * As per POST /api/Quiz/questions/{questionId}/answers
- */
-export interface AddAnswerRequest {
-  quizContentId: string;
-  answerText: string;
-  isCorrect: boolean;
-}
-
-/**
- * Represents the request body for updating quiz settings.
- * As per PUT /api/Quiz/quiz/{quizContentId}/settings
- */
-export interface UpdateQuizSettingsRequest {
-  passingScore: number;
-  allowRetake: boolean;
-  maxAttempts: number;
-}
-
-export interface QuestionAnswerRequest {
-  questionId: string;
-  selectedAnswerId: string;
-}
-
-export interface EvaluateQuizRequest {
-  answers: QuestionAnswerRequest[];
-}
-
-export interface QuestionResult {
-  questionId: string;
-  isCorrect: boolean;
-  selectedAnswerId?: string;
-  correctAnswerId?: string;
-  explanation: string;
-}
-
-export interface QuizResult {
-  totalQuestions: number;
-  correctAnswers: number;
-  score: number;
-  passed: boolean;
-  questionResults: QuestionResult[];
-}
+// These old quiz interfaces are kept for backward compatibility
+// Use CreateComprehensiveQuizRequest and related interfaces instead

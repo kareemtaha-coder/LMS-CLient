@@ -5,25 +5,29 @@ import { BASE_URL } from './base-url.token';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly baseUrl: string;
+  private readonly _baseUrl: string;
 
   constructor(private http: HttpClient, @Inject(BASE_URL) base: string) {
-    this.baseUrl = `${base}/api`;
+    this._baseUrl = `${base}/api`;
+  }
+
+  get baseUrl(): string {
+    return this._baseUrl;
   }
 
   get<T>(endpoint: string): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}/${endpoint}`);
+    return this.http.get<T>(`${this._baseUrl}/${endpoint}`);
   }
 
   post<T>(endpoint: string, body: unknown): Observable<T> {
-    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body);
+    return this.http.post<T>(`${this._baseUrl}/${endpoint}`, body);
   }
 
   put<T>(endpoint: string, body: unknown): Observable<T> {
-    return this.http.put<T>(`${this.baseUrl}/${endpoint}`, body);
+    return this.http.put<T>(`${this._baseUrl}/${endpoint}`, body);
   }
 
   delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}/${endpoint}`);
+    return this.http.delete<T>(`${this._baseUrl}/${endpoint}`);
   }
 }

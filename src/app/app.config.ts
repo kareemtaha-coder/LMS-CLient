@@ -6,6 +6,7 @@ import { BASE_URL } from './Core/api/base-url.token';
 import { routes } from './app.routes';
 import { ComponentPreloaderService } from './Core/router/component-preloader.service';
 import { authInterceptor } from './Core/auth/auth.interceptor';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' })
     ),
     provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: BASE_URL, useValue: 'https://almehrab.runasp.net' },
+    { provide: BASE_URL, useValue: environment.apiUrl },
     { provide: APP_INITIALIZER, multi: true, deps: [ComponentPreloaderService], useFactory: () => () => {} },
   ]
 };

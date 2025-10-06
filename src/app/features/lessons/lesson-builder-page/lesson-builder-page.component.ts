@@ -31,8 +31,8 @@ import { AddImageFormComponent, ImageFormSaveRequest } from '../add-image-form/a
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
 import { AddExamplesGridFormComponent } from "../add-examples-grid-form/add-examples-grid-form.component";
 import { ExamplesGridContentComponent } from "../components/examples-grid-content/examples-grid-content.component";
-import { AddQuizFormComponent } from "../add-quiz-form/add-quiz-form.component";
 import { QuizContentComponent } from "../components/quiz-content.component";
+import { ComprehensiveQuizComponent } from "../components/comprehensive-quiz/comprehensive-quiz.component";
 
 @Component({
   selector: 'app-lesson-builder-page',
@@ -48,8 +48,8 @@ import { QuizContentComponent } from "../components/quiz-content.component";
     ImageWithCaptionContentComponent,
     AddExamplesGridFormComponent,
     ExamplesGridContentComponent,
-    AddQuizFormComponent,
-    QuizContentComponent
+    QuizContentComponent,
+    ComprehensiveQuizComponent
   ],
   templateUrl:'./lesson-builder-page.component.html' ,
   styleUrls: ['./lesson-builder-page.component.css'],

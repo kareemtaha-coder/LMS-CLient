@@ -8,6 +8,7 @@ import { VideoContentComponent } from '../components/video-content/video-content
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
 import { ExamplesGridContentComponent } from '../components/examples-grid-content/examples-grid-content.component';
 import { QuizTakeComponent } from '../components/quiz-take.component';
+import { ComprehensiveQuizComponent } from '../components/comprehensive-quiz/comprehensive-quiz.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -20,7 +21,8 @@ import { CommonModule } from '@angular/common';
     VideoContentComponent,
     ImageWithCaptionContentComponent,
     ExamplesGridContentComponent,
-    QuizTakeComponent
+    QuizTakeComponent,
+    ComprehensiveQuizComponent
   ],
   templateUrl: './lesson-details.component.html',
   styleUrl: './lesson-details.component.css',
@@ -29,6 +31,16 @@ import { CommonModule } from '@angular/common';
 export class LessonDetailsComponent {
   protected lessonService = inject(LessonService);
   id = input.required<string>();
+
+  onQuizSaved(quiz: any) {
+    // إعادة تحميل الدرس بعد حفظ الكويز
+    this.lessonService.loadLesson(this.id()).subscribe();
+  }
+
+  onQuizDeleted(quizId: string) {
+    // إعادة تحميل الدرس بعد حذف الكويز
+    this.lessonService.loadLesson(this.id()).subscribe();
+  }
 
   constructor() {
     effect(() => {

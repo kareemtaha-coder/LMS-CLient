@@ -179,7 +179,12 @@
                       <app-examples-grid-content [content]="content" />
                     }
                     @case ('Quiz') {
-                      <app-quiz-take [quiz]="content" />
+                      <app-comprehensive-quiz 
+                        [lessonId]="lesson.id" 
+                        [quiz]="content" 
+                        [isEditable]="false"
+                        (quizSaved)="onQuizSaved($event)"
+                        (quizDeleted)="onQuizDeleted($event)" />
                     }
                     @default {
                       <div class="p-6 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">

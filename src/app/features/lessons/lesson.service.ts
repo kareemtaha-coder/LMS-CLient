@@ -16,13 +16,10 @@ import {
   VideoContent,
   RichTextContent,
   UpdateRichTextRequest,
-  AddQuizRequest,
-  AddQuestionRequest,
-  AddAnswerRequest,
-  EvaluateQuizRequest,
-  QuizResult,
-  UpdateQuizSettingsRequest,
   QuizContent,
+  CreateComprehensiveQuizRequest,
+  UpdateComprehensiveQuizRequest,
+  QuizContentResponse,
 } from '../../Core/api/api-models';
 import { ApiService } from '../../Core/api/api.service';
 
@@ -38,7 +35,7 @@ interface LessonState {
 export class LessonService {
   private apiService = inject(ApiService);
   private http = inject(HttpClient);
-  private apiUrl = 'https://almehrab.runasp.net/api';
+  private apiUrl = 'http://localhost:5290/api';
 
   #state = signal<LessonState>({
     lesson: null,
@@ -49,6 +46,7 @@ export class LessonService {
   public readonly lesson = () => this.#state().lesson;
   public readonly loading = () => this.#state().loading;
   public readonly error = () => this.#state().error;
+  public readonly lessonState = () => this.#state();
 
   public readonly selectedContent = signal<LessonContent | undefined>(
     undefined
@@ -61,6 +59,10 @@ export class LessonService {
   // =======================================================
   // REVERTING THE CHANGE: The method now returns an Observable
   // =======================================================
+  loadLesson(id: string): Observable<LessonDetails | null> {
+    return this.loadLessonById(id);
+  }
+
   loadLessonById(id: string): Observable<LessonDetails | null> {
     this.#state.set({ lesson: null, loading: true, error: null });
     this.selectedContent.set(undefined);
@@ -80,7 +82,7 @@ export class LessonService {
       catchError((error) => {
         console.error('Error loading lesson:', error);
         let errorMessage = 'Failed to load lesson details.';
-        
+
         if (error.status === 404) {
           errorMessage = 'Lesson not found.';
         } else if (error.status === 500) {
@@ -88,7 +90,7 @@ export class LessonService {
         } else if (error.status === 0) {
           errorMessage = 'Network error. Please check your connection.';
         }
-        
+
         this.#state.update((state) => ({
           ...state,
           loading: false,
@@ -117,13 +119,13 @@ export class LessonService {
         catchError((err) => {
           console.error('Failed to add rich text content', err);
           let errorMessage = 'Failed to add content.';
-          
+
           if (err.status === 500) {
             errorMessage = 'Server error occurred. Please try again later.';
           } else if (err.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.#state.update((s) => ({
             ...s,
             loading: false,
@@ -147,13 +149,13 @@ export class LessonService {
         catchError((err) => {
           console.error('Failed to reorder content', err);
           let errorMessage = 'Failed to reorder content.';
-          
+
           if (err.status === 500) {
             errorMessage = 'Server error occurred. Please try again later.';
           } else if (err.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.#state.update((s) => ({
             ...s,
             loading: false,
@@ -177,13 +179,13 @@ export class LessonService {
         catchError((err) => {
           console.error('Failed to add video content', err);
           let errorMessage = 'Failed to add video.';
-          
+
           if (err.status === 500) {
             errorMessage = 'Server error occurred. Please try again later.';
           } else if (err.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.#state.update((s) => ({
             ...s,
             loading: false,
@@ -213,13 +215,13 @@ export class LessonService {
         catchError((err) => {
           console.error('Failed to add image content', err);
           let errorMessage = 'Failed to add image.';
-          
+
           if (err.status === 500) {
             errorMessage = 'Server error occurred. Please try again later.';
           } else if (err.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.#state.update((s) => ({
             ...s,
             loading: false,
@@ -241,13 +243,13 @@ export class LessonService {
         catchError((err) => {
           console.error('Failed to add examples grid', err);
           let errorMessage = 'Failed to add examples grid.';
-          
+
           if (err.status === 500) {
             errorMessage = 'Server error occurred. Please try again later.';
           } else if (err.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.#state.update((s) => ({
             ...s,
             loading: false,
@@ -304,13 +306,13 @@ export class LessonService {
         catchError((err) => {
           console.error(`Failed to delete example item ${itemId}`, err);
           let errorMessage = 'Failed to delete example item.';
-          
+
           if (err.status === 500) {
             errorMessage = 'Server error occurred. Please try again later.';
           } else if (err.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.#state.update((s) => ({
             ...s,
             loading: false,
@@ -354,13 +356,13 @@ export class LessonService {
       catchError((err) => {
         console.error('[Service] API call failed.', err);
         let errorMessage = 'Failed to add example item.';
-        
+
         if (err.status === 500) {
           errorMessage = 'Server error occurred. Please try again later.';
         } else if (err.status === 0) {
           errorMessage = 'Network error. Please check your connection.';
         }
-        
+
         this.#state.update((s) => ({
           ...s,
           loading: false,
@@ -399,13 +401,13 @@ public updateRichTextContent(lessonId: string, contentId: string, request: Updat
     catchError(err => {
       console.error('Failed to update rich text content', err);
       let errorMessage = 'Failed to update rich text content.';
-      
+
       if (err.status === 500) {
         errorMessage = 'Server error occurred. Please try again later.';
       } else if (err.status === 0) {
         errorMessage = 'Network error. Please check your connection.';
       }
-      
+
       this.#state.update((s) => ({
         ...s,
         loading: false,
@@ -445,13 +447,13 @@ public updateVideoContent(lessonId: string, contentId: string, request: UpdateVi
     catchError(err => {
       console.error('Failed to update video content', err);
       let errorMessage = 'Failed to update video content.';
-      
+
       if (err.status === 500) {
         errorMessage = 'Server error occurred. Please try again later.';
       } else if (err.status === 0) {
         errorMessage = 'Network error. Please check your connection.';
       }
-      
+
       this.#state.update((s) => ({
         ...s,
         loading: false,
@@ -480,13 +482,13 @@ public updateImageContent(lessonId: string, contentId: string, request: UpdateIm
     catchError(err => {
       console.error('Failed to update image content', err);
       let errorMessage = 'Failed to update image content.';
-      
+
       if (err.status === 500) {
         errorMessage = 'Server error occurred. Please try again later.';
       } else if (err.status === 0) {
         errorMessage = 'Network error. Please check your connection.';
       }
-      
+
       this.#state.update((s) => ({
         ...s,
         loading: false,
@@ -498,143 +500,108 @@ public updateImageContent(lessonId: string, contentId: string, request: UpdateIm
 }
 
 // =================================================================
-// #region Quiz Management Methods
+// #region Comprehensive Quiz Methods
 // =================================================================
 
-/**
- * Adds a new quiz content block to a lesson.
- */
-public addQuizContent(lessonId: string, request: AddQuizRequest): Observable<LessonDetails | null> {
-  return this.apiService
-    .post<string>(`Quiz/lessons/${lessonId}/quiz`, request)
-    .pipe(
-      switchMap(() => this.loadLessonById(lessonId)),
-      catchError((err) => {
-        console.error('Failed to add quiz content', err);
-        let errorMessage = 'Failed to add quiz content.';
-        
-        if (err.status === 500) {
-          errorMessage = 'Server error occurred. Please try again later.';
-        } else if (err.status === 0) {
-          errorMessage = 'Network error. Please check your connection.';
-        }
-        
-        this.#state.update((s) => ({
-          ...s,
-          loading: false,
-          error: errorMessage,
-        }));
-        return of(null);
-      })
-    );
-}
-
-/**
- * Adds a new question to an existing quiz.
- */
-public addQuestionToQuiz(quizContentId: string, request: AddQuestionRequest): Observable<LessonDetails | null> {
-  return this.apiService
-    .post<string>(`Quiz/quiz/${quizContentId}/questions`, request)
-    .pipe(
-      switchMap(() => {
-        const lessonId = this.activeLessonId();
-        return lessonId ? this.loadLessonById(lessonId) : of(null);
-      }),
-      catchError((err) => {
-        console.error('Failed to add question to quiz', err);
-        let errorMessage = 'Failed to add question to quiz.';
-        
-        if (err.status === 500) {
-          errorMessage = 'Server error occurred. Please try again later.';
-        } else if (err.status === 0) {
-          errorMessage = 'Network error. Please check your connection.';
-        }
-        
-        this.#state.update((s) => ({
-          ...s,
-          loading: false,
-          error: errorMessage,
-        }));
-        return of(null);
-      })
-    );
-}
-
-/**
- * Adds a new answer to an existing question.
- */
-public addAnswerToQuestion(questionId: string, request: AddAnswerRequest): Observable<LessonDetails | null> {
-  return this.apiService
-    .post<string>(`Quiz/questions/${questionId}/answers`, request)
-    .pipe(
-      switchMap(() => {
-        const lessonId = this.activeLessonId();
-        return lessonId ? this.loadLessonById(lessonId) : of(null);
-      }),
-      catchError((err) => {
-        console.error('Failed to add answer to question', err);
-        let errorMessage = 'Failed to add answer to question.';
-        
-        if (err.status === 500) {
-          errorMessage = 'Server error occurred. Please try again later.';
-        } else if (err.status === 0) {
-          errorMessage = 'Network error. Please check your connection.';
-        }
-        
-        this.#state.update((s) => ({
-          ...s,
-          loading: false,
-          error: errorMessage,
-        }));
-        return of(null);
-      })
-    );
-}
-
-/**
- * Updates quiz settings (time limit, passing score, etc.).
- */
-public updateQuizSettings(quizContentId: string, request: UpdateQuizSettingsRequest): Observable<LessonDetails | null> {
-  return this.apiService
-    .put(`Quiz/quiz/${quizContentId}/settings`, request)
-    .pipe(
-      switchMap(() => {
-        const lessonId = this.activeLessonId();
-        return lessonId ? this.loadLessonById(lessonId) : of(null);
-      }),
-      catchError((err) => {
-        console.error('Failed to update quiz settings', err);
-        let errorMessage = 'Failed to update quiz settings.';
-        
-        if (err.status === 500) {
-          errorMessage = 'Server error occurred. Please try again later.';
-        } else if (err.status === 0) {
-          errorMessage = 'Network error. Please check your connection.';
-        }
-        
-        this.#state.update((s) => ({
-          ...s,
-          loading: false,
-          error: errorMessage,
-        }));
-        return of(null);
-      })
-    );
+  /**
+   * إنشاء كويز شامل مع الأسئلة والإجابات في endpoint واحد
+   */
+  createComprehensiveQuiz(lessonId: string, request: CreateComprehensiveQuizRequest): Observable<QuizContentResponse> {
+    return this.http.post<QuizContentResponse>(`${this.apiService.baseUrl}/QuizComprehensive/lessons/${lessonId}/quiz-comprehensive`, request)
+      .pipe(
+        tap(() => {
+          // إعادة تحميل الدرس بعد إنشاء الكويز
+          this.loadLesson(lessonId).subscribe();
+        }),
+        catchError(error => {
+          console.error('Error creating comprehensive quiz:', error);
+          if (error.status === 400) {
+            return throwError(() => new Error('بيانات غير صحيحة. تحقق من المدخلات'));
+          } else if (error.status === 404) {
+            return throwError(() => new Error('الدرس غير موجود'));
+          } else if (error.status === 500) {
+            return throwError(() => new Error('خطأ في الخادم. يرجى المحاولة مرة أخرى'));
+          } else if (error.status === 0) {
+            return throwError(() => new Error('خطأ في الاتصال. تحقق من اتصالك بالإنترنت'));
+          }
+          return throwError(() => new Error('فشل في إنشاء الاختبار'));
+        })
+      );
   }
 
-  evaluateQuiz(quizContentId: string, request: EvaluateQuizRequest): Observable<QuizResult> {
-    return this.http.post<QuizResult>(`${this.apiUrl}/Quiz/quiz/${quizContentId}/evaluate`, request).pipe(
-      catchError(error => {
-        console.error('Error evaluating quiz:', error);
-        if (error.status === 404) {
-          return throwError(() => new Error('الاختبار غير موجود'));
-        } else if (error.status === 500) {
-          return throwError(() => new Error('خطأ في الخادم. يرجى المحاولة مرة أخرى'));
-        } else if (error.status === 0) {
-          return throwError(() => new Error('خطأ في الاتصال. تحقق من اتصالك بالإنترنت'));
-        }
-        return throwError(() => new Error('فشل في تقييم الاختبار'));
-      })
-    );
+  /**
+   * تحديث كويز شامل مع الأسئلة والإجابات
+   */
+  updateComprehensiveQuiz(quizContentId: string, request: UpdateComprehensiveQuizRequest): Observable<QuizContentResponse> {
+    return this.http.put<QuizContentResponse>(`${this.apiService.baseUrl}/api/QuizComprehensive/quiz/${quizContentId}/comprehensive`, request)
+      .pipe(
+        tap(() => {
+          // إعادة تحميل الدرس بعد تحديث الكويز
+          const lessonId = this.lessonState().lesson?.id;
+          if (lessonId) {
+            this.loadLesson(lessonId).subscribe();
+          }
+        }),
+        catchError(error => {
+          console.error('Error updating comprehensive quiz:', error);
+          if (error.status === 400) {
+            return throwError(() => new Error('بيانات غير صحيحة. تحقق من المدخلات'));
+          } else if (error.status === 404) {
+            return throwError(() => new Error('الاختبار غير موجود'));
+          } else if (error.status === 500) {
+            return throwError(() => new Error('خطأ في الخادم. يرجى المحاولة مرة أخرى'));
+          } else if (error.status === 0) {
+            return throwError(() => new Error('خطأ في الاتصال. تحقق من اتصالك بالإنترنت'));
+          }
+          return throwError(() => new Error('فشل في تحديث الاختبار'));
+        })
+      );
+  }
+
+  /**
+   * حذف كويز بالكامل
+   */
+  deleteQuiz(quizContentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiService.baseUrl}/api/QuizComprehensive/quiz/${quizContentId}`)
+      .pipe(
+        tap(() => {
+          // إعادة تحميل الدرس بعد حذف الكويز
+          const lessonId = this.lessonState().lesson?.id;
+          if (lessonId) {
+            this.loadLesson(lessonId).subscribe();
+          }
+        }),
+        catchError(error => {
+          console.error('Error deleting quiz:', error);
+          if (error.status === 404) {
+            return throwError(() => new Error('الاختبار غير موجود'));
+          } else if (error.status === 500) {
+            return throwError(() => new Error('خطأ في الخادم. يرجى المحاولة مرة أخرى'));
+          } else if (error.status === 0) {
+            return throwError(() => new Error('خطأ في الاتصال. تحقق من اتصالك بالإنترنت'));
+          }
+          return throwError(() => new Error('فشل في حذف الاختبار'));
+        })
+      );
+  }
+
+  /**
+   * الحصول على كويز مع جميع أسئلته وإجاباته
+   */
+  getComprehensiveQuiz(quizContentId: string): Observable<QuizContentResponse> {
+    return this.http.get<QuizContentResponse>(`${this.apiService.baseUrl}/api/QuizComprehensive/quiz/${quizContentId}/comprehensive`)
+      .pipe(
+        catchError(error => {
+          console.error('Error getting comprehensive quiz:', error);
+          if (error.status === 404) {
+            return throwError(() => new Error('الاختبار غير موجود'));
+          } else if (error.status === 500) {
+            return throwError(() => new Error('خطأ في الخادم. يرجى المحاولة مرة أخرى'));
+          } else if (error.status === 0) {
+            return throwError(() => new Error('خطأ في الاتصال. تحقق من اتصالك بالإنترنت'));
+          }
+          return throwError(() => new Error('فشل في تحميل الاختبار'));
+        })
+      );
   }
 }

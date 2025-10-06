@@ -334,11 +334,12 @@
                   (cancel)="cancelAddNew()"
                 />
               } @else if (addingContentType() === 'Quiz') {
-                <app-add-quiz-form
+                <app-comprehensive-quiz
                   [lessonId]="lessonService.activeLessonId()!"
-                  [sortOrder]="lesson.contents.length + 1"
-                  (quizAdded)="cancelAddNew()"
-                  (cancelled)="cancelAddNew()"
+                  [quiz]="null"
+                  [isEditable]="true"
+                  (quizSaved)="cancelAddNew()"
+                  (quizDeleted)="cancelAddNew()"
                 />
               }
             </div>

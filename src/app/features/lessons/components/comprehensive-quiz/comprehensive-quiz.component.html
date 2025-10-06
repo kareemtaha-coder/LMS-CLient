@@ -1,0 +1,252 @@
+<div class="comprehensive-quiz-container">
+  <!-- Quiz Header -->
+  <div class="quiz-header">
+    <div class="quiz-title-section">
+      <div class="quiz-icon">
+        <i class="bi bi-mortarboard"></i>
+      </div>
+      <div class="quiz-info">
+        <h3 class="quiz-title" *ngIf="!isEditing() && !isCreating()">{{ quiz?.title || 'اختبار جديد' }}</h3>
+        <div class="quiz-meta" *ngIf="!isEditing() && !isCreating() && quiz">
+          <span class="meta-item">
+            <i class="bi bi-list-check"></i>
+            {{ quiz.questions.length }} سؤال
+          </span>
+          <span class="meta-item">
+            <i class="bi bi-star-fill"></i>
+            كل سؤال بدرجة واحدة
+          </span>
+          <span class="meta-item">
+            <i class="bi bi-clock"></i>
+            {{ quiz.questions.length * 2 }} دقيقة
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="quiz-actions" *ngIf="isEditable && !isEditing() && !isCreating()">
+      <button class="btn btn-edit" (click)="startEditing()">
+        <i class="bi bi-pencil-square"></i>
+        تعديل
+      </button>
+      <button class="btn btn-delete" (click)="deleteQuiz()">
+        <i class="bi bi-trash3"></i>
+        حذف
+      </button>
+    </div>
+  </div>
+
+  <!-- Quiz Form -->
+  <div class="quiz-form" *ngIf="isEditing() || isCreating()">
+    <div class="form-section">
+      <div class="form-group">
+        <label class="form-label">
+          <i class="bi bi-bookmark"></i>
+          عنوان الاختبار
+        </label>
+        <input 
+          type="text" 
+          [(ngModel)]="quizForm.title" 
+          class="form-control"
+          placeholder="أدخل عنوان الاختبار..."
+        />
+      </div>
+    </div>
+
+    <!-- Questions Section -->
+    <div class="questions-section">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="bi bi-question-circle"></i>
+          <h4>أسئلة الاختبار (اختيار من متعدد)</h4>
+        </div>
+        <button class="btn btn-add-question" (click)="addQuestion()">
+          <i class="bi bi-plus-circle-fill"></i>
+          إضافة سؤال
+        </button>
+      </div>
+
+      <div class="questions-list" *ngIf="quizForm.questions.length > 0">
+        <div class="question-item" *ngFor="let question of quizForm.questions; let i = index">
+          <div class="question-header">
+            <div class="question-info">
+              <span class="question-number">
+                <i class="bi bi-1-circle-fill"></i>
+                سؤال {{ i + 1 }}
+              </span>
+              <span class="question-badge">
+                <i class="bi bi-check2-square"></i>
+                اختيار من متعدد
+              </span>
+            </div>
+            <button class="btn btn-remove-question" (click)="removeQuestion(i)">
+              <i class="bi bi-trash3"></i>
+              حذف
+            </button>
+          </div>
+
+          <div class="question-form">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="bi bi-chat-quote"></i>
+                نص السؤال
+              </label>
+              <textarea 
+                [(ngModel)]="question.questionText" 
+                class="form-control question-textarea"
+                rows="3"
+                placeholder="أدخل نص السؤال..."
+              ></textarea>
+            </div>
+
+            <!-- Answers Section -->
+            <div class="answers-section">
+              <div class="answers-header">
+                <div class="answers-title">
+                  <i class="bi bi-list-ul"></i>
+                  <h5>خيارات الإجابة</h5>
+                </div>
+                <button class="btn btn-add-answer" (click)="addAnswer(i)">
+                  <i class="bi bi-plus-circle-fill"></i>
+                  إضافة إجابة
+                </button>
+              </div>
+
+              <div class="answers-list" *ngIf="question.answers.length > 0">
+                <div class="answer-item" *ngFor="let answer of question.answers; let j = index">
+                  <div class="answer-form">
+                    <div class="answer-input-group">
+                      <input 
+                        type="text" 
+                        [(ngModel)]="answer.answerText" 
+                        class="form-control answer-input"
+                        placeholder="أدخل نص الإجابة..."
+                      />
+                      <div class="answer-actions">
+                        <label class="checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            [(ngModel)]="answer.isCorrect"
+                            class="form-checkbox"
+                          />
+                          <span class="checkbox-text">
+                            <i class="bi bi-check-circle-fill"></i>
+                            إجابة صحيحة
+                          </span>
+                        </label>
+                        <button class="btn btn-remove-answer" (click)="removeAnswer(i, j)">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="quizForm.questions.length === 0">
+        <div class="empty-icon">
+          <i class="bi bi-question-circle-fill"></i>
+        </div>
+        <h5>لا توجد أسئلة بعد</h5>
+        <p>ابدأ بإضافة أسئلة للاختبار (اختيار من متعدد فقط)</p>
+        <button class="btn btn-add-first-question" (click)="addQuestion()">
+          <i class="bi bi-plus-circle-fill"></i>
+          إضافة أول سؤال
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button class="btn btn-cancel" (click)="cancelEditing()" [disabled]="isLoading()">
+        <i class="bi bi-x-circle"></i>
+        إلغاء
+      </button>
+      <button class="btn btn-save" (click)="saveQuiz()" [disabled]="isLoading()">
+        <i class="bi bi-check-circle-fill" *ngIf="!isLoading()"></i>
+        <span class="spinner-border spinner-border-sm" *ngIf="isLoading()"></span>
+        {{ isCreating() ? 'إنشاء الاختبار' : 'حفظ التغييرات' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Quiz Display (Read-only) -->
+  <div class="quiz-display" *ngIf="!isEditing() && !isCreating() && quiz">
+    <!-- Quiz Statistics -->
+    <div class="quiz-stats">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="bi bi-list-check"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ quiz.questions.length }}</span>
+          <span class="stat-label">عدد الأسئلة</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="bi bi-star-fill"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ quiz.questions.length }}</span>
+          <span class="stat-label">إجمالي الدرجات</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="bi bi-clock-fill"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ quiz.questions.length * 2 }}</span>
+          <span class="stat-label">دقيقة</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questions Display -->
+    <div class="questions-display" *ngIf="quiz.questions.length > 0">
+      <div class="display-header">
+        <i class="bi bi-question-circle-fill"></i>
+        <h4>أسئلة الاختبار</h4>
+      </div>
+      <div class="questions-list">
+        <div class="question-display-item" *ngFor="let question of quiz.questions; let i = index">
+          <div class="question-display-header">
+            <div class="question-display-info">
+              <span class="question-display-number">
+                <i class="bi bi-1-circle-fill"></i>
+                سؤال {{ i + 1 }}
+              </span>
+              <span class="question-display-badge">
+                <i class="bi bi-check2-square"></i>
+                اختيار من متعدد
+              </span>
+            </div>
+          </div>
+
+          <div class="question-display-text">
+            {{ question.questionText }}
+          </div>
+
+          <!-- Answers Display -->
+          <div class="answers-display" *ngIf="question.answers.length > 0">
+            <div class="answer-display-item" *ngFor="let answer of question.answers">
+              <div class="answer-display-content">
+                <span class="answer-display-text">{{ answer.answerText }}</span>
+                <span class="answer-display-status" [class.correct]="answer.isCorrect">
+                  <i class="bi" [class.bi-check-circle-fill]="answer.isCorrect" [class.bi-x-circle-fill]="!answer.isCorrect"></i>
+                  {{ answer.isCorrect ? 'صحيح' : 'خاطئ' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
