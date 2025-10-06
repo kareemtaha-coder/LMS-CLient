@@ -22,7 +22,7 @@ export interface LoginRequest {
 }
 
 const STORAGE_KEY = 'lms_auth_state';
-const LOGIN_ENDPOINT = 'http://localhost:5290/api/Auth/login';
+const LOGIN_ENDPOINT = 'https://almehrab.runasp.net/api/Auth/login';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

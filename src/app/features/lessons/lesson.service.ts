@@ -35,7 +35,7 @@ interface LessonState {
 export class LessonService {
   private apiService = inject(ApiService);
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5290/api';
+  private apiUrl = 'https://almehrab.runasp.net/api';
 
   #state = signal<LessonState>({
     lesson: null,
