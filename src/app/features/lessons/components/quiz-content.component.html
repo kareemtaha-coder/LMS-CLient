@@ -1,0 +1,244 @@
+<div class="quiz-content-container">
+  <!-- Quiz Header -->
+  <div class="quiz-header">
+    <div class="quiz-title-section">
+      <h3 class="quiz-title">{{ quiz.title }}</h3>
+      <div class="quiz-meta">
+        <span class="meta-item">
+          <i class="icon-clock"></i>
+          {{ quiz.timeLimitMinutes }} دقيقة
+        </span>
+        <span class="meta-item">
+          <i class="icon-target"></i>
+          {{ quiz.passingScore }}% للنجاح
+        </span>
+        <span class="meta-item">
+          <i class="icon-repeat"></i>
+          {{ quiz.maxAttempts }} محاولة
+        </span>
+        <span class="meta-item" *ngIf="quiz.allowRetake">
+          <i class="icon-check"></i>
+          إعادة المحاولة مسموحة
+        </span>
+      </div>
+    </div>
+    
+    <div class="quiz-actions" *ngIf="isEditable">
+      <button class="btn btn-outline btn-sm" (click)="toggleSettingsForm()">
+        <i class="icon-settings"></i>
+        إعدادات
+      </button>
+      <button class="btn btn-outline btn-sm" (click)="onEditQuiz()">
+        <i class="icon-edit"></i>
+        تعديل
+      </button>
+      <button class="btn btn-danger btn-sm" (click)="onDeleteQuiz()">
+        <i class="icon-trash"></i>
+        حذف
+      </button>
+    </div>
+  </div>
+
+  <!-- Quiz Settings Form -->
+  <div class="quiz-settings-form" *ngIf="showSettingsForm">
+    <h4>إعدادات الاختبار</h4>
+    <div class="settings-grid">
+      <div class="setting-item">
+        <label>مدة الاختبار (دقيقة)</label>
+        <input 
+          type="number" 
+          [(ngModel)]="quizSettings.timeLimitMinutes" 
+          min="1" 
+          max="300"
+          class="form-control"
+        />
+      </div>
+      <div class="setting-item">
+        <label>نسبة النجاح (%)</label>
+        <input 
+          type="number" 
+          [(ngModel)]="quizSettings.passingScore" 
+          min="0" 
+          max="100"
+          class="form-control"
+        />
+      </div>
+      <div class="setting-item">
+        <label>عدد المحاولات</label>
+        <input 
+          type="number" 
+          [(ngModel)]="quizSettings.maxAttempts" 
+          min="1" 
+          max="10"
+          class="form-control"
+        />
+      </div>
+      <div class="setting-item">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="quizSettings.allowRetake"
+            class="form-checkbox"
+          />
+          السماح بإعادة المحاولة
+        </label>
+      </div>
+    </div>
+    <div class="settings-actions">
+      <button class="btn btn-secondary" (click)="showSettingsForm = false">إلغاء</button>
+      <button class="btn btn-primary" (click)="updateQuizSettings()">حفظ الإعدادات</button>
+    </div>
+  </div>
+
+  <!-- Quiz Statistics -->
+  <div class="quiz-stats">
+    <div class="stat-item">
+      <span class="stat-label">عدد الأسئلة:</span>
+      <span class="stat-value">{{ quiz.questions.length }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">إجمالي النقاط:</span>
+      <span class="stat-value">{{ getTotalPoints() }}</span>
+    </div>
+  </div>
+
+  <!-- Questions List -->
+  <div class="questions-container">
+    <div class="questions-header">
+      <h4>أسئلة الاختبار</h4>
+      <button 
+        class="btn btn-primary btn-sm" 
+        (click)="toggleAddQuestionForm()"
+        *ngIf="isEditable"
+      >
+        <i class="icon-plus"></i>
+        إضافة سؤال
+      </button>
+    </div>
+
+    <!-- Add Question Form -->
+    <div class="add-question-form" *ngIf="showAddQuestionForm">
+      <h5>إضافة سؤال جديد</h5>
+      <div class="form-group">
+        <label>نص السؤال</label>
+        <textarea 
+          [(ngModel)]="newQuestion.questionText" 
+          class="form-control"
+          rows="3"
+          placeholder="أدخل نص السؤال..."
+        ></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>نوع السؤال</label>
+          <select [(ngModel)]="newQuestion.questionType" class="form-control">
+            <option [value]="QuestionType.MultipleChoice">اختيار من متعدد</option>
+            <option [value]="QuestionType.TrueFalse">صح أو خطأ</option>
+            <option [value]="QuestionType.FillInTheBlank">ملء الفراغات</option>
+            <option [value]="QuestionType.ShortAnswer">إجابة قصيرة</option>
+            <option [value]="QuestionType.Essay">مقال</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>النقاط</label>
+          <input 
+            type="number" 
+            [(ngModel)]="newQuestion.points" 
+            min="1"
+            class="form-control"
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" (click)="showAddQuestionForm = false">إلغاء</button>
+        <button class="btn btn-primary" (click)="addQuestion()">إضافة السؤال</button>
+      </div>
+    </div>
+
+    <!-- Questions List -->
+    <div class="questions-list" *ngIf="quiz.questions.length > 0">
+      <div class="question-item" *ngFor="let question of quiz.questions; let i = index">
+        <div class="question-header">
+          <div class="question-info">
+            <span class="question-number">سؤال {{ i + 1 }}</span>
+            <span class="question-type">{{ getQuestionTypeLabel(question.questionType) }}</span>
+            <span class="question-points">{{ question.points }} نقطة</span>
+          </div>
+          <button 
+            class="btn btn-outline btn-xs" 
+            (click)="toggleAddAnswerForm(question.id)"
+            *ngIf="isEditable"
+          >
+            <i class="icon-plus"></i>
+            إضافة إجابة
+          </button>
+        </div>
+
+        <div class="question-text">
+          {{ question.questionText }}
+        </div>
+
+        <!-- Add Answer Form -->
+        <div class="add-answer-form" *ngIf="showAddAnswerForm[question.id]">
+          <div class="form-group">
+            <label>نص الإجابة</label>
+            <input 
+              type="text" 
+              [(ngModel)]="newAnswers[question.id].answerText" 
+              class="form-control"
+              placeholder="أدخل نص الإجابة..."
+            />
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="newAnswers[question.id].isCorrect"
+                class="form-checkbox"
+              />
+              إجابة صحيحة
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary" (click)="showAddAnswerForm[question.id] = false">إلغاء</button>
+            <button class="btn btn-primary" (click)="addAnswer(question.id)">إضافة الإجابة</button>
+          </div>
+        </div>
+
+        <!-- Answers List -->
+        <div class="answers-list" *ngIf="question.answers.length > 0">
+          <div class="answer-item" *ngFor="let answer of question.answers">
+            <div class="answer-content">
+              <span class="answer-text">{{ answer.answerText }}</span>
+              <span class="answer-status" [class.correct]="answer.isCorrect">
+                {{ answer.isCorrect ? 'صحيح' : 'خاطئ' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-stats">
+          <span class="stat">عدد الإجابات: {{ question.answers.length }}</span>
+          <span class="stat">الإجابات الصحيحة: {{ getCorrectAnswersCount(question) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="quiz.questions.length === 0">
+      <div class="empty-icon">
+        <i class="icon-question"></i>
+      </div>
+      <h5>لا توجد أسئلة بعد</h5>
+      <p>ابدأ بإضافة أسئلة للاختبار</p>
+      <button 
+        class="btn btn-primary" 
+        (click)="toggleAddQuestionForm()"
+        *ngIf="isEditable"
+      >
+        <i class="icon-plus"></i>
+        إضافة أول سؤال
+      </button>
+    </div>
+  </div>
+</div>

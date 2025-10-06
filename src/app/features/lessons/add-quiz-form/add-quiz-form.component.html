@@ -1,0 +1,119 @@
+<div class="quiz-form-container">
+  <div class="form-header">
+    <h3>إضافة اختبار جديد</h3>
+    <p class="form-description">أضف اختباراً جديداً للدرس مع إعدادات مخصصة</p>
+  </div>
+
+  <form [formGroup]="quizForm" (ngSubmit)="onSubmit()" class="quiz-form">
+    <!-- عنوان الاختبار -->
+    <div class="form-group">
+      <label for="title" class="form-label">عنوان الاختبار *</label>
+      <input
+        type="text"
+        id="title"
+        formControlName="title"
+        class="form-control"
+        placeholder="أدخل عنوان الاختبار"
+        [class.is-invalid]="title?.invalid && title?.touched"
+      />
+      <div class="invalid-feedback" *ngIf="title?.invalid && title?.touched">
+        <span *ngIf="title?.errors?.['required']">عنوان الاختبار مطلوب</span>
+        <span *ngIf="title?.errors?.['minlength']">يجب أن يكون العنوان 3 أحرف على الأقل</span>
+      </div>
+    </div>
+
+    <!-- مدة الاختبار -->
+    <div class="form-group">
+      <label for="timeLimitMinutes" class="form-label">مدة الاختبار (بالدقائق) *</label>
+      <input
+        type="number"
+        id="timeLimitMinutes"
+        formControlName="timeLimitMinutes"
+        class="form-control"
+        min="1"
+        max="300"
+        [class.is-invalid]="timeLimitMinutes?.invalid && timeLimitMinutes?.touched"
+      />
+      <div class="invalid-feedback" *ngIf="timeLimitMinutes?.invalid && timeLimitMinutes?.touched">
+        <span *ngIf="timeLimitMinutes?.errors?.['required']">مدة الاختبار مطلوبة</span>
+        <span *ngIf="timeLimitMinutes?.errors?.['min']">يجب أن تكون المدة دقيقة واحدة على الأقل</span>
+        <span *ngIf="timeLimitMinutes?.errors?.['max']">يجب ألا تتجاوز المدة 300 دقيقة</span>
+      </div>
+    </div>
+
+    <!-- نسبة النجاح -->
+    <div class="form-group">
+      <label for="passingScore" class="form-label">نسبة النجاح (%) *</label>
+      <input
+        type="number"
+        id="passingScore"
+        formControlName="passingScore"
+        class="form-control"
+        min="0"
+        max="100"
+        [class.is-invalid]="passingScore?.invalid && passingScore?.touched"
+      />
+      <div class="invalid-feedback" *ngIf="passingScore?.invalid && passingScore?.touched">
+        <span *ngIf="passingScore?.errors?.['required']">نسبة النجاح مطلوبة</span>
+        <span *ngIf="passingScore?.errors?.['min']">يجب أن تكون النسبة 0% على الأقل</span>
+        <span *ngIf="passingScore?.errors?.['max']">يجب ألا تتجاوز النسبة 100%</span>
+      </div>
+    </div>
+
+    <!-- عدد المحاولات -->
+    <div class="form-group">
+      <label for="maxAttempts" class="form-label">عدد المحاولات المسموحة *</label>
+      <input
+        type="number"
+        id="maxAttempts"
+        formControlName="maxAttempts"
+        class="form-control"
+        min="1"
+        max="10"
+        [class.is-invalid]="maxAttempts?.invalid && maxAttempts?.touched"
+      />
+      <div class="invalid-feedback" *ngIf="maxAttempts?.invalid && maxAttempts?.touched">
+        <span *ngIf="maxAttempts?.errors?.['required']">عدد المحاولات مطلوب</span>
+        <span *ngIf="maxAttempts?.errors?.['min']">يجب أن يكون العدد محاولة واحدة على الأقل</span>
+        <span *ngIf="maxAttempts?.errors?.['max']">يجب ألا يتجاوز العدد 10 محاولات</span>
+      </div>
+    </div>
+
+    <!-- السماح بإعادة المحاولة -->
+    <div class="form-group">
+      <div class="form-check">
+        <input
+          type="checkbox"
+          id="allowRetake"
+          formControlName="allowRetake"
+          class="form-check-input"
+        />
+        <label for="allowRetake" class="form-check-label">
+          السماح للطلاب بإعادة المحاولة
+        </label>
+      </div>
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting"
+      >
+        إلغاء
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="quizForm.invalid || isSubmitting"
+      >
+        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status">
+          <span class="visually-hidden">جاري الحفظ...</span>
+        </span>
+        {{ isSubmitting ? 'جاري الحفظ...' : 'إضافة الاختبار' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -17,7 +17,8 @@ import {
   AddExampleItemRequest,
   UpdateRichTextRequest,
   UpdateVideoRequest,
-  UpdateImageRequest
+  UpdateImageRequest,
+  QuizContent
 } from '../../../Core/api/api-models';
 import { of, switchMap } from 'rxjs';
 
@@ -30,6 +31,8 @@ import { AddImageFormComponent, ImageFormSaveRequest } from '../add-image-form/a
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
 import { AddExamplesGridFormComponent } from "../add-examples-grid-form/add-examples-grid-form.component";
 import { ExamplesGridContentComponent } from "../components/examples-grid-content/examples-grid-content.component";
+import { AddQuizFormComponent } from "../add-quiz-form/add-quiz-form.component";
+import { QuizContentComponent } from "../components/quiz-content.component";
 
 @Component({
   selector: 'app-lesson-builder-page',
@@ -44,7 +47,9 @@ import { ExamplesGridContentComponent } from "../components/examples-grid-conten
     AddImageFormComponent,
     ImageWithCaptionContentComponent,
     AddExamplesGridFormComponent,
-    ExamplesGridContentComponent
+    ExamplesGridContentComponent,
+    AddQuizFormComponent,
+    QuizContentComponent
   ],
   templateUrl:'./lesson-builder-page.component.html' ,
   styleUrls: ['./lesson-builder-page.component.css'],
@@ -56,7 +61,7 @@ export class LessonBuilderPageComponent {
 
   // --- State Signals ---
   protected editingContentId = signal<string | null>(null);
-  protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesGrid' | null>(null);
+  protected addingContentType = signal<'RichText' | 'Video' | 'Image' | 'ExamplesGrid' | 'Quiz' | null>(null);
   protected addingAtIndex = signal<number | 'bottom'>('bottom');
   protected collapsedState = signal<Record<string, boolean>>({});
   protected contextualMenuOpenAtIndex = signal<number | null>(null);
@@ -191,7 +196,7 @@ export class LessonBuilderPageComponent {
     this.contextualMenuOpenAtIndex.set(index);
   }
 
-  showAddNewForm(type: 'RichText' | 'Video' | 'Image' | 'ExamplesGrid', index: number | 'bottom'): void {
+  showAddNewForm(type: 'RichText' | 'Video' | 'Image' | 'ExamplesGrid' | 'Quiz', index: number | 'bottom'): void {
     this.contextualMenuOpenAtIndex.set(null);
     this.addingContentType.set(type);
     this.addingAtIndex.set(index);
@@ -219,6 +224,8 @@ export class LessonBuilderPageComponent {
         return 'border-l-green-500';
       case 'ExamplesGrid':
         return 'border-l-purple-500';
+      case 'Quiz':
+        return 'border-l-orange-500';
       default:
         return 'border-l-slate-400';
     }

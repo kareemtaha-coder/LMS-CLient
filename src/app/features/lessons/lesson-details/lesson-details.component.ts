@@ -7,6 +7,7 @@ import { RichTextContentComponent } from '../components/rich-text-content/rich-t
 import { VideoContentComponent } from '../components/video-content/video-content.component';
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
 import { ExamplesGridContentComponent } from '../components/examples-grid-content/examples-grid-content.component';
+import { QuizTakeComponent } from '../components/quiz-take.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -18,7 +19,8 @@ import { CommonModule } from '@angular/common';
     RichTextContentComponent,
     VideoContentComponent,
     ImageWithCaptionContentComponent,
-    ExamplesGridContentComponent
+    ExamplesGridContentComponent,
+    QuizTakeComponent
   ],
   templateUrl: './lesson-details.component.html',
   styleUrl: './lesson-details.component.css',

@@ -6,6 +6,8 @@ import { RichTextContentComponent } from '../components/rich-text-content/rich-t
 import { VideoContentComponent } from '../components/video-content/video-content.component';
 import { ImageWithCaptionContentComponent } from '../components/image-with-caption-content/image-with-caption-content.component';
 import { ExamplesGridContentComponent } from '../components/examples-grid-content/examples-grid-content.component';
+import { QuizContentComponent } from '../components/quiz-content.component';
+import { QuizTakeComponent } from '../components/quiz-take.component';
 
 @Component({
   selector: 'app-content-host',
@@ -13,7 +15,9 @@ import { ExamplesGridContentComponent } from '../components/examples-grid-conten
     RichTextContentComponent,
     VideoContentComponent,
     ImageWithCaptionContentComponent,
-    ExamplesGridContentComponent
+    ExamplesGridContentComponent,
+    QuizContentComponent,
+    QuizTakeComponent
 ],
   templateUrl: './content-host.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,4 +28,5 @@ import { ExamplesGridContentComponent } from '../components/examples-grid-conten
 export class ContentHostComponent {
   // This input will be populated by the router's resolver.
   content = input.required<LessonContent>();
+  isEditable = input<boolean>(false);
 }

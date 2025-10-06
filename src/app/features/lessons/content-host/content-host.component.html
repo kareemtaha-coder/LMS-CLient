@@ -12,5 +12,12 @@
     @case ('ExamplesGrid') {
       <app-examples-grid-content [content]="c" />
     }
+    @case ('Quiz') {
+      @if (isEditable()) {
+        <app-quiz-content [quiz]="c" [isEditable]="true" />
+      } @else {
+        <app-quiz-take [quiz]="c" />
+      }
+    }
   }
 }

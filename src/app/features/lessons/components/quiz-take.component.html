@@ -1,0 +1,256 @@
+<div class="quiz-take-container">
+  <!-- Quiz Introduction -->
+  <div class="quiz-intro" *ngIf="!isQuizStarted() && !isQuizSubmitted()">
+    <div class="intro-header">
+      <h2 class="quiz-title">{{ quiz.title }}</h2>
+      <div class="quiz-info">
+        <div class="info-item">
+          <i class="icon-clock"></i>
+          <span>مدة الاختبار: {{ quiz.timeLimitMinutes }} دقيقة</span>
+        </div>
+        <div class="info-item">
+          <i class="icon-target"></i>
+          <span>نسبة النجاح: {{ quiz.passingScore }}%</span>
+        </div>
+        <div class="info-item">
+          <i class="icon-question"></i>
+          <span>عدد الأسئلة: {{ quiz.questions.length }}</span>
+        </div>
+        <div class="info-item" *ngIf="quiz.allowRetake">
+          <i class="icon-repeat"></i>
+          <span>يمكن إعادة المحاولة</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="quiz-instructions">
+      <h3>تعليمات الاختبار</h3>
+      <ul>
+        <li>اقرأ كل سؤال بعناية قبل الإجابة</li>
+        <li>يمكنك التنقل بين الأسئلة باستخدام الأزرار</li>
+        <li>تأكد من الإجابة على جميع الأسئلة قبل التسليم</li>
+        <li>سيتم إيقاف الاختبار تلقائياً عند انتهاء الوقت</li>
+      </ul>
+    </div>
+    
+    <div class="start-quiz-section">
+      <button class="btn btn-primary btn-lg" (click)="startQuiz()">
+        <i class="icon-play"></i>
+        بدء الاختبار
+      </button>
+    </div>
+  </div>
+
+  <!-- Quiz Taking Interface -->
+  <div class="quiz-taking" *ngIf="isQuizStarted() && !isQuizSubmitted()">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+      <div class="quiz-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+        <div class="progress-text">
+          سؤال {{ currentQuestionIndex() + 1 }} من {{ totalQuestions }}
+        </div>
+      </div>
+      
+      <div class="quiz-timer" [class.warning]="timeRemaining() < 300">
+        <i class="icon-clock"></i>
+        {{ timeRemainingFormatted }}
+      </div>
+    </div>
+
+    <!-- Question Navigation -->
+    <div class="question-nav">
+      <div class="nav-buttons">
+        <button 
+          class="btn btn-outline" 
+          (click)="previousQuestion()"
+          [disabled]="currentQuestionIndex() === 0"
+        >
+          <i class="icon-arrow-left"></i>
+          السابق
+        </button>
+        
+        <button 
+          class="btn btn-outline" 
+          (click)="nextQuestion()"
+          [disabled]="currentQuestionIndex() === totalQuestions - 1"
+        >
+          التالي
+          <i class="icon-arrow-right"></i>
+        </button>
+      </div>
+      
+      <div class="question-dots">
+        <button
+          *ngFor="let question of quiz.questions; let i = index"
+          class="question-dot"
+          [class.active]="i === currentQuestionIndex()"
+          [class.answered]="isQuestionAnswered(question.id)"
+          (click)="goToQuestion(i)"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Current Question -->
+    <div class="question-container" *ngIf="currentQuestion">
+      <div class="question-header">
+        <div class="question-meta">
+          <span class="question-type">{{ getQuestionTypeLabel(currentQuestion.questionType) }}</span>
+          <span class="question-points">{{ currentQuestion.points }} نقطة</span>
+        </div>
+      </div>
+      
+      <div class="question-text">
+        {{ currentQuestion.questionText }}
+      </div>
+      
+      <!-- Answer Options -->
+      <div class="answer-options">
+        @switch (currentQuestion.questionType) {
+          @case (QuestionType.MultipleChoice) {
+            <div class="multiple-choice">
+              <label 
+                *ngFor="let answer of currentQuestion.answers" 
+                class="answer-option"
+              >
+                <input
+                  type="radio"
+                  [name]="'question_' + currentQuestion.id"
+                  [value]="answer.answerText"
+                  [checked]="getAnswerForQuestion(currentQuestion.id) === answer.answerText"
+                  (change)="onAnswerChange(currentQuestion.id, answer.answerText)"
+                />
+                <span class="option-text">{{ answer.answerText }}</span>
+              </label>
+            </div>
+          }
+          
+          @case (QuestionType.TrueFalse) {
+            <div class="true-false">
+              <label class="answer-option">
+                <input
+                  type="radio"
+                  [name]="'question_' + currentQuestion.id"
+                  value="صح"
+                  [checked]="getAnswerForQuestion(currentQuestion.id) === 'صح'"
+                  (change)="onAnswerChange(currentQuestion.id, 'صح')"
+                />
+                <span class="option-text">صح</span>
+              </label>
+              <label class="answer-option">
+                <input
+                  type="radio"
+                  [name]="'question_' + currentQuestion.id"
+                  value="خطأ"
+                  [checked]="getAnswerForQuestion(currentQuestion.id) === 'خطأ'"
+                  (change)="onAnswerChange(currentQuestion.id, 'خطأ')"
+                />
+                <span class="option-text">خطأ</span>
+              </label>
+            </div>
+          }
+          
+          @case (QuestionType.FillInTheBlank) {
+            <div class="text-input">
+              <input
+                type="text"
+                [value]="getAnswerForQuestion(currentQuestion.id)"
+                (input)="onTextInputChange(currentQuestion.id, $event)"
+                placeholder="أدخل إجابتك هنا..."
+                class="form-control"
+              />
+            </div>
+          }
+          
+          @case (QuestionType.ShortAnswer) {
+            <div class="text-input">
+              <textarea
+                [value]="getAnswerForQuestion(currentQuestion.id)"
+                (input)="onTextInputChange(currentQuestion.id, $event)"
+                placeholder="أدخل إجابتك هنا..."
+                class="form-control"
+                rows="3"
+              ></textarea>
+            </div>
+          }
+          
+          @case (QuestionType.Essay) {
+            <div class="text-input">
+              <textarea
+                [value]="getAnswerForQuestion(currentQuestion.id)"
+                (input)="onTextInputChange(currentQuestion.id, $event)"
+                placeholder="اكتب مقالك هنا..."
+                class="form-control"
+                rows="8"
+              ></textarea>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Quiz Footer -->
+    <div class="quiz-footer">
+      <div class="answered-count">
+        تم الإجابة على {{ getAnsweredQuestionsCount() }} من {{ totalQuestions }} أسئلة
+      </div>
+      
+      <div class="submit-section">
+        <button 
+          class="btn btn-primary"
+          (click)="submitQuiz()"
+          [disabled]="getAnsweredQuestionsCount() === 0"
+        >
+          <i class="icon-check"></i>
+          تسليم الاختبار
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Results -->
+  <div class="quiz-results" *ngIf="isQuizSubmitted()">
+    <div class="results-header">
+      <div class="result-icon" [class.passed]="isPassed()" [class.failed]="!isPassed()">
+        <i [class]="isPassed() ? 'icon-check-circle' : 'icon-x-circle'"></i>
+      </div>
+      
+      <h2 class="result-title">
+        {{ isPassed() ? 'مبروك! لقد نجحت في الاختبار' : 'لم تنجح في الاختبار هذه المرة' }}
+      </h2>
+    </div>
+    
+    <div class="results-stats">
+      <div class="stat-item">
+        <span class="stat-label">درجتك:</span>
+        <span class="stat-value">{{ calculateScore().correct }} / {{ calculateScore().total }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">النسبة المئوية:</span>
+        <span class="stat-value">{{ calculateScore().percentage }}%</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">نسبة النجاح المطلوبة:</span>
+        <span class="stat-value">{{ quiz.passingScore }}%</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">الوقت المستغرق:</span>
+        <span class="stat-value">{{ Math.floor(timeSpent / 60) }}:{{ (timeSpent % 60).toString().padStart(2, '0') }}</span>
+      </div>
+    </div>
+    
+    <div class="results-actions">
+      <button class="btn btn-primary" (click)="startQuiz()" *ngIf="quiz.allowRetake">
+        <i class="icon-repeat"></i>
+        إعادة المحاولة
+      </button>
+      <button class="btn btn-secondary" (click)="goBack()">
+        العودة للدرس
+      </button>
+    </div>
+  </div>
+</div>

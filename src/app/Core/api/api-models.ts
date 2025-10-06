@@ -134,7 +134,8 @@ export type ContentType =
   | 'RichText'
   | 'Video'
   | 'ImageWithCaption'
-  | 'ExamplesGrid';
+  | 'ExamplesGrid'
+  | 'Quiz';
 
 /**
  * Represents a summary of a lesson within a chapter.
@@ -197,13 +198,60 @@ export interface ExamplesGridContent extends LessonContentBase {
   exampleItems: ExampleItem[];
 }
 
+// =================================================================
+// #region Quiz Content Types
+// =================================================================
+
+/**
+ * [cite_start]Represents the possible question types for quiz questions. [cite: QuestionType enum]
+ */
+export enum QuestionType {
+  MultipleChoice = 1,
+  TrueFalse = 2,
+  FillInTheBlank = 3,
+  ShortAnswer = 4,
+  Essay = 5
+}
+
+/**
+ * Represents a single answer option for a quiz question.
+ */
+export interface QuizAnswer {
+  id: string; // guid
+  answerText: string;
+  isCorrect: boolean;
+}
+
+/**
+ * Represents a single question within a quiz.
+ */
+export interface QuizQuestion {
+  id: string; // guid
+  questionText: string;
+  questionType: QuestionType;
+  points: number;
+  answers: QuizAnswer[];
+}
+
+/**
+ * Represents a quiz content block within a lesson.
+ */
+export interface QuizContent extends LessonContentBase {
+  contentType: 'Quiz';
+  timeLimitMinutes: number;
+  passingScore: number;
+  allowRetake: boolean;
+  maxAttempts: number;
+  questions: QuizQuestion[];
+}
 
 /** A union of all possible lesson content types. */
 export type LessonContent =
   | RichTextContent
   | VideoContent
   | ImageWithCaptionContent
-  | ExamplesGridContent;
+  | ExamplesGridContent
+  | QuizContent;
 
 // =================================================================
 // #region Lesson Content API Requests
@@ -374,4 +422,52 @@ export interface UpdateVideoRequest {
  */
 export interface ReorderLessonsRequest {
   orderedLessonIds: string[];
+}
+
+// =================================================================
+// #region Quiz API Requests
+// =================================================================
+
+/**
+ * Represents the request body for adding a quiz to a lesson.
+ * As per POST /api/Quiz/lessons/{lessonId}/quiz
+ */
+export interface AddQuizRequest {
+  sortOrder: number;
+  title: string;
+  timeLimitMinutes?: number;
+  passingScore?: number;
+  allowRetake?: boolean;
+  maxAttempts?: number;
+}
+
+/**
+ * Represents the request body for adding a question to a quiz.
+ * As per POST /api/Quiz/quiz/{quizContentId}/questions
+ */
+export interface AddQuestionRequest {
+  questionText: string;
+  questionType: QuestionType;
+  points?: number;
+}
+
+/**
+ * Represents the request body for adding an answer to a question.
+ * As per POST /api/Quiz/questions/{questionId}/answers
+ */
+export interface AddAnswerRequest {
+  quizContentId: string;
+  answerText: string;
+  isCorrect: boolean;
+}
+
+/**
+ * Represents the request body for updating quiz settings.
+ * As per PUT /api/Quiz/quiz/{quizContentId}/settings
+ */
+export interface UpdateQuizSettingsRequest {
+  timeLimitMinutes: number;
+  passingScore: number;
+  allowRetake: boolean;
+  maxAttempts: number;
 }

@@ -15,6 +15,11 @@ import {
   VideoContent,
   RichTextContent,
   UpdateRichTextRequest,
+  AddQuizRequest,
+  AddQuestionRequest,
+  AddAnswerRequest,
+  UpdateQuizSettingsRequest,
+  QuizContent,
 } from '../../Core/api/api-models';
 import { ApiService } from '../../Core/api/api.service';
 
@@ -356,5 +361,83 @@ public updateImageContent(lessonId: string, contentId: string, request: UpdateIm
       return of(null);
     })
   );
+}
+
+// =================================================================
+// #region Quiz Management Methods
+// =================================================================
+
+/**
+ * Adds a new quiz content block to a lesson.
+ */
+public addQuizContent(lessonId: string, request: AddQuizRequest): Observable<LessonDetails | null> {
+  return this.apiService
+    .post<string>(`Quiz/lessons/${lessonId}/quiz`, request)
+    .pipe(
+      switchMap(() => this.loadLessonById(lessonId)),
+      catchError((err) => {
+        console.error('Failed to add quiz content', err);
+        this.#state.update((s) => ({
+          ...s,
+          loading: false,
+          error: 'Failed to add quiz content.',
+        }));
+        return of(null);
+      })
+    );
+}
+
+/**
+ * Adds a new question to an existing quiz.
+ */
+public addQuestionToQuiz(quizContentId: string, request: AddQuestionRequest): Observable<LessonDetails | null> {
+  return this.apiService
+    .post<string>(`Quiz/quiz/${quizContentId}/questions`, request)
+    .pipe(
+      switchMap(() => {
+        const lessonId = this.activeLessonId();
+        return lessonId ? this.loadLessonById(lessonId) : of(null);
+      }),
+      catchError((err) => {
+        console.error('Failed to add question to quiz', err);
+        return of(null);
+      })
+    );
+}
+
+/**
+ * Adds a new answer to an existing question.
+ */
+public addAnswerToQuestion(questionId: string, request: AddAnswerRequest): Observable<LessonDetails | null> {
+  return this.apiService
+    .post<string>(`Quiz/questions/${questionId}/answers`, request)
+    .pipe(
+      switchMap(() => {
+        const lessonId = this.activeLessonId();
+        return lessonId ? this.loadLessonById(lessonId) : of(null);
+      }),
+      catchError((err) => {
+        console.error('Failed to add answer to question', err);
+        return of(null);
+      })
+    );
+}
+
+/**
+ * Updates quiz settings (time limit, passing score, etc.).
+ */
+public updateQuizSettings(quizContentId: string, request: UpdateQuizSettingsRequest): Observable<LessonDetails | null> {
+  return this.apiService
+    .put(`Quiz/quiz/${quizContentId}/settings`, request)
+    .pipe(
+      switchMap(() => {
+        const lessonId = this.activeLessonId();
+        return lessonId ? this.loadLessonById(lessonId) : of(null);
+      }),
+      catchError((err) => {
+        console.error('Failed to update quiz settings', err);
+        return of(null);
+      })
+    );
 }
 }

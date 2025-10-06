@@ -251,6 +251,12 @@
                               (deleteItem)="handleDeleteExampleItem(content.id, $event)"
                             />
                           }
+                          @case('Quiz') {
+                            <app-quiz-content
+                              [quiz]="content"
+                              [isEditable]="true"
+                            />
+                          }
                           @default {
                             <p class="text-sm text-slate-500 dark:text-slate-400">
                               Content type not supported
@@ -327,6 +333,13 @@
                   (save)="handleSaveExamplesGrid($event)"
                   (cancel)="cancelAddNew()"
                 />
+              } @else if (addingContentType() === 'Quiz') {
+                <app-add-quiz-form
+                  [lessonId]="lessonService.activeLessonId()!"
+                  [sortOrder]="lesson.contents.length + 1"
+                  (quizAdded)="cancelAddNew()"
+                  (cancelled)="cancelAddNew()"
+                />
               }
             </div>
           } @else {
@@ -361,6 +374,13 @@
                 >
                   <span class="w-5 h-5 bg-white/20 rounded text-xs flex items-center justify-center">⊞</span>
                   Examples
+                </button>
+                <button
+                  (click)="showAddNewForm('Quiz', 'bottom')"
+                  class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-all hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  <span class="w-5 h-5 bg-white/20 rounded text-xs flex items-center justify-center">❓</span>
+                  Quiz
                 </button>
               </div>
             </div>
